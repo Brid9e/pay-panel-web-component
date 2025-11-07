@@ -30,87 +30,97 @@ pnpm run build
 <script src="./dist/payment-panel.js"></script>
 ```
 
-### 2. 创建组件实例
+引入后会自动初始化，全局对象 `PaymentPanel` 可直接使用。
 
-```javascript
-// 方式1: 使用 createElement
-const paymentPanel = document.createElement('payment-panel');
-document.body.appendChild(paymentPanel);
-
-// 方式2: 直接在 HTML 中使用
-<payment-panel></payment-panel>
-```
-
-### 3. 打开支付面板
+### 2. 打开支付面板
 
 ```javascript
 // 基础打开
-paymentPanel.open();
+PaymentPanel.open();
 
 // 带金额打开
-paymentPanel.open(99.99);
+PaymentPanel.open(99.99);
 ```
 
-### 4. 关闭支付面板
+### 3. 关闭支付面板
 
 ```javascript
-paymentPanel.close();
+PaymentPanel.close();
 ```
 
-### 5. 设置金额
+### 4. 设置金额
 
 ```javascript
-paymentPanel.setAmount(199.00);
+PaymentPanel.setAmount(199.00);
+```
+
+### 5. 自定义支付方式
+
+```javascript
+// 设置支付方式列表和字段映射
+PaymentPanel.setPaymentMethods(
+  [
+    { id: 1, name: '微信支付', desc: '推荐使用', icon: '💳' },
+    { id: 2, name: '支付宝', desc: '安全便捷', icon: '💰' },
+    { id: 3, name: 'Apple Pay', desc: '快速支付', icon: '🍎' }
+  ],
+  {
+    titleField: 'name',      // 标题字段名
+    subtitleField: 'desc',   // 副标题字段名
+    iconField: 'icon',       // 图标字段名
+    valueField: 'id'         // 值字段名
+  }
+);
 ```
 
 ### 6. 自定义关闭阈值
 
 ```javascript
-// 方式1: 通过方法设置
-paymentPanel.setCloseThreshold(150); // 设置距离阈值为150px
-paymentPanel.setCloseThresholdPercent(0.4); // 设置距离阈值为面板高度的40%
-paymentPanel.setVelocityThreshold(0.8); // 设置速度阈值为0.8px/ms
-
-// 方式2: 通过HTML属性设置
-<payment-panel
-  close-threshold="150"
-  close-threshold-percent="0.4"
-  velocity-threshold="0.8">
-</payment-panel>
+PaymentPanel.setCloseThreshold(150); // 设置距离阈值为150px
+PaymentPanel.setCloseThresholdPercent(0.4); // 设置距离阈值为面板高度的40%
+PaymentPanel.setVelocityThreshold(0.8); // 设置速度阈值为0.8px/ms
 ```
 
 ### 7. 监听事件
 
 ```javascript
 // 监听支付确认事件
-paymentPanel.addEventListener('payment-confirm', (e) => {
-  const { method, amount } = e.detail;
+PaymentPanel.on('payment-confirm', (e) => {
+  const { method, amount, methodData } = e.detail;
   console.log('支付方式:', method);
   console.log('支付金额:', amount);
+  console.log('完整数据:', methodData);
 });
 
 // 监听关闭事件
-paymentPanel.addEventListener('payment-close', () => {
+PaymentPanel.on('payment-close', () => {
   console.log('支付面板已关闭');
 });
+
+// 移除事件监听
+PaymentPanel.off('payment-confirm', handler);
 ```
 
 ## API
 
-### 方法
+### 全局方法
 
-- `open(amount?: number)` - 打开支付面板，可选传入金额
-- `close()` - 关闭支付面板
-- `setAmount(amount: number)` - 设置支付金额
-- `setCloseThreshold(threshold: number)` - 设置关闭距离阈值（像素）
-- `setCloseThresholdPercent(percent: number)` - 设置关闭距离阈值（百分比，0-1之间）
-- `setVelocityThreshold(threshold: number)` - 设置速度阈值（像素/毫秒）
-
-### 属性
-
-- `close-threshold` - 关闭距离阈值（像素，默认100px）
-- `close-threshold-percent` - 关闭距离阈值（百分比，默认0.3即30%）
-- `velocity-threshold` - 速度阈值（像素/毫秒，默认0.5）
+- `PaymentPanel.open(amount?: number)` - 打开支付面板，可选传入金额
+- `PaymentPanel.close()` - 关闭支付面板
+- `PaymentPanel.setAmount(amount: number)` - 设置支付金额
+- `PaymentPanel.setPaymentMethods(methods, fieldMapping?)` - 设置支付方式列表
+  - `methods`: 支付方式数组，每个对象必须包含唯一标识字段（如 `value` 或 `id`）
+  - `fieldMapping`: 可选，字段映射配置
+    - `titleField`: 标题字段名（默认 'title' 或 'name'）
+    - `subtitleField`: 副标题字段名（默认 'subtitle' 或 'desc'）
+    - `iconField`: 图标字段名（默认 'icon'）
+    - `valueField`: 值字段名（默认 'value' 或 'id'）
+- `PaymentPanel.getSelectedMethod()` - 获取当前选中的支付方式
+- `PaymentPanel.setCloseThreshold(threshold: number)` - 设置关闭距离阈值（像素）
+- `PaymentPanel.setCloseThresholdPercent(percent: number)` - 设置关闭距离阈值（百分比，0-1之间）
+- `PaymentPanel.setVelocityThreshold(threshold: number)` - 设置速度阈值（像素/毫秒）
+- `PaymentPanel.on(event, handler)` - 监听事件
+- `PaymentPanel.off(event, handler)` - 移除事件监听
 
 ### 拖拽关闭
 
@@ -123,7 +133,8 @@ paymentPanel.addEventListener('payment-close', () => {
 ### 事件
 
 - `payment-confirm` - 支付确认时触发，事件详情包含：
-  - `method`: 选择的支付方式（wechat/alipay/card）
+  - `method`: 选择的支付方式的值（根据 valueField 配置）
+  - `methodData`: 完整的支付方式对象
   - `amount`: 支付金额
 - `payment-close` - 支付面板关闭时触发
 

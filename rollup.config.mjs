@@ -5,7 +5,7 @@ export default {
   output: {
     file: 'dist/payment-panel.js',
     format: 'iife',
-    name: 'PaymentPanel',
+    name: 'PaymentPanelModule',
     sourcemap: false
   },
   plugins: [

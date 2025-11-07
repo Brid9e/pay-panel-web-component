@@ -124,7 +124,7 @@
         <button class="btn" onclick="openPaymentPanel()">打开支付面板</button>
         <div class="info">
           点击按钮打开支付面板，支持从下而上滑出动画<br />
-          💡 提示：可以通过向下拖拽来关闭面板（拖拽手柄或标题栏区域）
+          提示：可以通过向下拖拽来关闭面板（拖拽手柄或标题栏区域）
         </div>
       </div>
 
@@ -157,10 +157,33 @@
           打开支付面板（自定义阈值）
         </button>
         <div class="info">
-          可以通过属性或方法自定义关闭阈值：<br />
-          • close-threshold: 关闭距离阈值（像素，默认100px）<br />
-          • close-threshold-percent: 关闭距离阈值（百分比，默认0.3即30%）<br />
-          • velocity-threshold: 速度阈值（像素/毫秒，默认0.5）
+          可以通过方法自定义关闭阈值：<br />
+          • setCloseThreshold: 关闭距离阈值（像素，默认100px）<br />
+          • setCloseThresholdPercent: 关闭距离阈值（百分比，默认0.3即30%）<br />
+          • setVelocityThreshold: 速度阈值（像素/毫秒，默认0.5）
+        </div>
+      </div>
+
+      <div class="demo-section">
+        <h2>自定义支付方式</h2>
+        <button class="btn" onclick="openPaymentPanelWithCustomMethods()">
+          打开支付面板（自定义支付方式）
+        </button>
+        <div class="info">
+          可以通过 setPaymentMethods 方法自定义支付方式列表和字段映射
+        </div>
+      </div>
+
+      <div class="demo-section">
+        <h2>遮罩层点击行为</h2>
+        <button class="btn" onclick="openPaymentPanelWithoutOverlayClose()">
+          打开支付面板（点击遮罩不关闭）
+        </button>
+        <button class="btn btn-secondary" onclick="openPaymentPanelWithOverlayClose()">
+          打开支付面板（点击遮罩关闭，默认）
+        </button>
+        <div class="info">
+          使用 setCloseOnOverlayClick(false) 可以禁用点击遮罩层关闭功能
         </div>
       </div>
     </div>
@@ -169,63 +192,80 @@
     <script src="./dist/payment-panel.js"></script>
 
     <script>
-      let paymentPanel
-
-      // 初始化组件
-      function initPaymentPanel() {
-        paymentPanel = document.createElement('payment-panel')
-        document.body.appendChild(paymentPanel)
-      }
-
       // 基础打开
       function openPaymentPanel() {
-        if (!paymentPanel) initPaymentPanel()
-        paymentPanel.open()
+        PaymentPanel.open()
       }
 
       // 带金额打开
       function openPaymentPanelWithAmount(amount) {
-        if (!paymentPanel) initPaymentPanel()
-        paymentPanel.open(amount)
+        PaymentPanel.open(amount)
       }
 
       // 带事件监听
       function openPaymentPanelWithEvents() {
-        if (!paymentPanel) {
-          initPaymentPanel()
+        // 监听支付确认事件
+        PaymentPanel.on('payment-confirm', (e) => {
+          const { method, amount } = e.detail
+          document.getElementById(
+            'eventInfo'
+          ).textContent = `支付确认: 方式=${method}, 金额=¥${amount}`
+        })
 
-          // 监听支付确认事件
-          paymentPanel.addEventListener('payment-confirm', (e) => {
-            const { method, amount } = e.detail
-            document.getElementById(
-              'eventInfo'
-            ).textContent = `支付确认: 方式=${method}, 金额=¥${amount}`
-          })
+        // 监听关闭事件
+        PaymentPanel.on('payment-close', () => {
+          console.log('支付面板已关闭')
+        })
 
-          // 监听关闭事件
-          paymentPanel.addEventListener('payment-close', () => {
-            console.log('支付面板已关闭')
-          })
-        }
-        paymentPanel.open(88.88)
+        PaymentPanel.open(88.88)
       }
 
       // 自定义阈值
       function openPaymentPanelWithCustomThreshold() {
-        if (!paymentPanel) {
-          initPaymentPanel()
-        }
         // 设置关闭阈值为150px或40%面板高度，速度阈值为0.8px/ms
-        paymentPanel.setCloseThreshold(150)
-        paymentPanel.setCloseThresholdPercent(0.4)
-        paymentPanel.setVelocityThreshold(0.8)
-        paymentPanel.open(199.99)
+        PaymentPanel.setCloseThreshold(150)
+        PaymentPanel.setCloseThresholdPercent(0.4)
+        PaymentPanel.setVelocityThreshold(0.8)
+        PaymentPanel.open(199.99)
       }
 
-      // 页面加载完成后初始化
-      window.addEventListener('DOMContentLoaded', () => {
-        console.log('支付面板组件已加载')
-      })
+      // 自定义支付方式
+      function openPaymentPanelWithCustomMethods() {
+        // 自定义支付方式列表
+        PaymentPanel.setPaymentMethods(
+          [
+            { id: 1, name: '微信支付', desc: '推荐使用', icon: '💳' },
+            { id: 2, name: '支付宝', desc: '安全便捷', icon: '💰' },
+            { id: 3, name: 'Apple Pay', desc: '快速支付', icon: '🍎' }
+          ],
+          {
+            titleField: 'name', // 使用 name 字段作为标题
+            subtitleField: 'desc', // 使用 desc 字段作为副标题
+            iconField: 'icon', // 使用 icon 字段作为图标
+            valueField: 'id' // 使用 id 字段作为值
+          }
+        )
+
+        PaymentPanel.on('payment-confirm', (e) => {
+          console.log('支付确认:', e.detail)
+        })
+
+        PaymentPanel.open(299.99)
+      }
+
+      // 禁用点击遮罩层关闭
+      function openPaymentPanelWithoutOverlayClose() {
+        // 设置点击遮罩层不关闭
+        PaymentPanel.setCloseOnOverlayClick(false)
+        PaymentPanel.open(199.99)
+      }
+
+      // 启用点击遮罩层关闭（默认）
+      function openPaymentPanelWithOverlayClose() {
+        // 设置点击遮罩层关闭（默认行为）
+        PaymentPanel.setCloseOnOverlayClick(true)
+        PaymentPanel.open(199.99)
+      }
     </script>
   </body>
 </html>

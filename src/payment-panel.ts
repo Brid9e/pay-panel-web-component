@@ -1,3 +1,17 @@
+// 支付方式接口
+interface PaymentMethod {
+  [key: string]: any // 允许任意字段
+  value: string | number // 必须有一个唯一标识
+}
+
+// 字段映射配置
+interface FieldMapping {
+  titleField?: string // 标题字段名，默认 'title' 或 'name'
+  subtitleField?: string // 副标题字段名，默认 'subtitle' 或 'desc' 或 'description'
+  iconField?: string // 图标字段名，默认 'icon'
+  valueField?: string // 值字段名，默认 'value' 或 'id'
+}
+
 class PaymentPanel extends HTMLElement {
   private shadow: ShadowRoot
   private isOpen: boolean = false
@@ -18,15 +32,39 @@ class PaymentPanel extends HTMLElement {
   private closeThresholdPercent: number = 0.3 // 默认30%
   private velocityThreshold: number = 0.5 // 默认0.5px/ms
 
+  // 行为配置
+  private closeOnOverlayClick: boolean = true // 默认点击遮罩层关闭
+
+  // 支付方式配置
+  private paymentMethods: PaymentMethod[] = []
+  private fieldMapping: FieldMapping = {}
+  private selectedMethod: PaymentMethod | null = null
+
   constructor() {
     super()
     this.shadow = this.attachShadow({ mode: 'open' })
     this.isOpen = false
+
+    // 默认支付方式
+    this.paymentMethods = [
+      { value: 'wechat', title: '微信支付', subtitle: '推荐使用', icon: '💳' },
+      { value: 'alipay', title: '支付宝', subtitle: '安全便捷', icon: '💰' },
+      { value: 'card', title: '银行卡', subtitle: '支持各大银行', icon: '💵' }
+    ]
+    this.fieldMapping = {
+      titleField: 'title',
+      subtitleField: 'subtitle',
+      iconField: 'icon',
+      valueField: 'value'
+    }
+    if (this.paymentMethods.length > 0) {
+      this.selectedMethod = this.paymentMethods[0]
+    }
   }
 
   // 静态属性观察器，用于监听属性变化
   static get observedAttributes() {
-    return ['close-threshold', 'close-threshold-percent', 'velocity-threshold']
+    return ['close-threshold', 'close-threshold-percent', 'velocity-threshold', 'close-on-overlay-click']
   }
 
   attributeChangedCallback(name: string, oldValue: string, newValue: string) {
@@ -41,6 +79,9 @@ class PaymentPanel extends HTMLElement {
         break
       case 'velocity-threshold':
         this.velocityThreshold = parseFloat(newValue) || 0.5
+        break
+      case 'close-on-overlay-click':
+        this.closeOnOverlayClick = newValue !== 'false'
         break
     }
   }
@@ -157,6 +198,50 @@ class PaymentPanel extends HTMLElement {
           touch-action: pan-y;
         }
 
+        .panel-close-btn {
+          position: absolute;
+          top: 12px;
+          left: 12px;
+          width: 24px;
+          height: 24px;
+          background: none;
+          border: none;
+          padding: 0;
+          cursor: pointer;
+          z-index: 10000;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          touch-action: manipulation;
+          opacity: 0.7;
+          transition: opacity 0.2s ease;
+        }
+
+        .panel-close-btn:hover {
+          opacity: 1;
+        }
+
+        .panel-close-btn svg {
+          width: 100%;
+          height: 100%;
+        }
+
+        .panel-close-btn svg path {
+          stroke: var(--text-secondary-light);
+        }
+
+        :host([data-theme="dark"]) .panel-close-btn svg path {
+          stroke: #ffffff;
+        }
+
+        .panel-close-btn:hover svg path {
+          stroke: var(--text-primary-light);
+        }
+
+        :host([data-theme="dark"]) .panel-close-btn:hover svg path {
+          stroke: #ffffff;
+        }
+
         :host([data-theme="dark"]) .panel {
           background-color: var(--bg-panel-dark);
           box-shadow: 0 -4px 20px var(--shadow-dark);
@@ -202,6 +287,12 @@ class PaymentPanel extends HTMLElement {
         :host([data-theme="dark"]) .header {
           border-bottom-color: var(--border-dark);
           background-color: transparent;
+        }
+
+        .header-content {
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
 
         .header-title {
@@ -415,9 +506,16 @@ class PaymentPanel extends HTMLElement {
       </style>
       <div class="overlay"></div>
       <div class="panel">
+        <button class="panel-close-btn" id="closeBtn" aria-label="关闭">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M6 6L18 18M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
         <div class="drag-handle"></div>
         <div class="header">
-          <h3 class="header-title">支付</h3>
+          <div class="header-content">
+            <h3 class="header-title">支付</h3>
+          </div>
         </div>
         <div class="content">
           <div class="amount-section">
@@ -426,30 +524,7 @@ class PaymentPanel extends HTMLElement {
           </div>
           <div class="payment-methods">
             <div class="payment-methods-title">选择支付方式</div>
-            <div class="payment-method selected" data-method="wechat">
-              <div class="payment-icon">💳</div>
-              <div class="payment-info">
-                <div class="payment-name">微信支付</div>
-                <div class="payment-desc">推荐使用</div>
-              </div>
-              <div class="payment-radio"></div>
-            </div>
-            <div class="payment-method" data-method="alipay">
-              <div class="payment-icon">💰</div>
-              <div class="payment-info">
-                <div class="payment-name">支付宝</div>
-                <div class="payment-desc">安全便捷</div>
-              </div>
-              <div class="payment-radio"></div>
-            </div>
-            <div class="payment-method" data-method="card">
-              <div class="payment-icon">💵</div>
-              <div class="payment-info">
-                <div class="payment-name">银行卡</div>
-                <div class="payment-desc">支持各大银行</div>
-              </div>
-              <div class="payment-radio"></div>
-            </div>
+            <div id="payment-methods-list"></div>
           </div>
         </div>
         <div class="actions">
@@ -461,12 +536,76 @@ class PaymentPanel extends HTMLElement {
 
     this.overlay = this.shadow.querySelector('.overlay')
     this.panel = this.shadow.querySelector('.panel')
+
+    // 渲染支付方式列表
+    this.renderPaymentMethods()
+  }
+
+  private renderPaymentMethods() {
+    const container = this.shadow.querySelector('#payment-methods-list')
+    if (!container) return
+
+    const titleField = this.fieldMapping.titleField || 'title'
+    const subtitleField = this.fieldMapping.subtitleField || 'subtitle'
+    const iconField = this.fieldMapping.iconField || 'icon'
+    const valueField = this.fieldMapping.valueField || 'value'
+
+    // 如果没有找到指定字段，尝试常见字段名
+    const getField = (item: PaymentMethod, field: string, fallbacks: string[]) => {
+      if (item[field] !== undefined) return item[field]
+      for (const fallback of fallbacks) {
+        if (item[fallback] !== undefined) return item[fallback]
+      }
+      return ''
+    }
+
+    container.innerHTML = this.paymentMethods
+      .map((method, index) => {
+        const value = String(getField(method, valueField, ['value', 'id', 'code']) || index)
+        const title = String(getField(method, titleField, ['title', 'name', 'label']) || '')
+        const subtitle = String(getField(method, subtitleField, ['subtitle', 'desc', 'description']) || '')
+        const icon = String(getField(method, iconField, ['icon', 'emoji']) || '💳')
+        const isSelected = this.selectedMethod === method || (index === 0 && !this.selectedMethod)
+
+        return `
+          <div class="payment-method ${isSelected ? 'selected' : ''}" data-method="${value}" data-index="${index}">
+            <div class="payment-icon">${icon}</div>
+            <div class="payment-info">
+              <div class="payment-name">${title}</div>
+              ${subtitle ? `<div class="payment-desc">${subtitle}</div>` : ''}
+            </div>
+            <div class="payment-radio"></div>
+          </div>
+        `
+      })
+      .join('')
   }
 
   private setupEventListeners() {
     // 遮罩层点击关闭
     if (this.overlay) {
       this.overlay.addEventListener('click', () => {
+        this.close()
+      })
+    }
+
+    // 左上角关闭按钮
+    const closeBtn = this.shadow.querySelector('#closeBtn')
+    if (closeBtn) {
+      // 使用 mousedown 和 touchstart 确保在拖拽事件之前触发
+      closeBtn.addEventListener('mousedown', (e) => {
+        e.stopPropagation()
+        e.preventDefault()
+        this.close()
+      })
+      closeBtn.addEventListener('touchstart', (e) => {
+        e.stopPropagation()
+        e.preventDefault()
+        this.close()
+      })
+      closeBtn.addEventListener('click', (e) => {
+        e.stopPropagation()
+        e.preventDefault()
         this.close()
       })
     }
@@ -483,14 +622,21 @@ class PaymentPanel extends HTMLElement {
     const confirmBtn = this.shadow.querySelector('#confirmBtn')
     if (confirmBtn) {
       confirmBtn.addEventListener('click', () => {
-        const selectedMethod = this.shadow
+        const selectedIndex = this.shadow
           .querySelector('.payment-method.selected')
-          ?.getAttribute('data-method')
+          ?.getAttribute('data-index')
+        const selectedMethod = selectedIndex !== null && selectedIndex !== undefined
+          ? this.paymentMethods[parseInt(selectedIndex, 10)]
+          : null
         const amount =
           this.shadow.querySelector('#amount')?.textContent || '0.00'
         this.dispatchEvent(
           new CustomEvent('payment-confirm', {
-            detail: { method: selectedMethod, amount },
+            detail: {
+              method: selectedMethod?.value || selectedMethod,
+              methodData: selectedMethod,
+              amount
+            },
             bubbles: true,
             composed: true
           })
@@ -499,14 +645,19 @@ class PaymentPanel extends HTMLElement {
       })
     }
 
-    // 支付方式选择
-    const paymentMethods = this.shadow.querySelectorAll('.payment-method')
-    paymentMethods.forEach((method) => {
-      method.addEventListener('click', () => {
-        paymentMethods.forEach((m) => m.classList.remove('selected'))
-        method.classList.add('selected')
+    // 支付方式选择（使用事件委托，因为列表是动态生成的）
+    if (this.panel) {
+      this.panel.addEventListener('click', (e) => {
+        const target = (e.target as HTMLElement).closest('.payment-method')
+        if (target) {
+          const index = parseInt(target.getAttribute('data-index') || '0')
+          this.selectedMethod = this.paymentMethods[index]
+          const paymentMethods = this.shadow.querySelectorAll('.payment-method')
+          paymentMethods.forEach((m) => m.classList.remove('selected'))
+          target.classList.add('selected')
+        }
       })
-    })
+    }
 
     // 阻止面板内容点击关闭
     if (this.panel) {
@@ -561,6 +712,12 @@ class PaymentPanel extends HTMLElement {
     const header = this.shadow.querySelector('.header')
     const content = this.shadow.querySelector('.content')
     const actions = this.shadow.querySelector('.actions')
+    const closeBtn = this.shadow.querySelector('#closeBtn')
+
+    // 如果点击的是关闭按钮，不处理拖拽
+    if (closeBtn?.contains(target) || target.closest('#closeBtn')) {
+      return
+    }
 
     // 如果点击的是内容区域或操作按钮区域，允许正常交互（滚动、点击）
     if (content?.contains(target) || actions?.contains(target)) {
@@ -758,11 +915,53 @@ class PaymentPanel extends HTMLElement {
     this.velocityThreshold = threshold
     this.setAttribute('velocity-threshold', String(threshold))
   }
+
+  // 设置支付方式列表
+  public setPaymentMethods(methods: PaymentMethod[], fieldMapping?: FieldMapping) {
+    this.paymentMethods = methods || []
+    if (fieldMapping) {
+      this.fieldMapping = { ...this.fieldMapping, ...fieldMapping }
+    }
+    if (this.paymentMethods.length > 0 && !this.selectedMethod) {
+      this.selectedMethod = this.paymentMethods[0]
+    }
+    this.renderPaymentMethods()
+  }
+
+  // 获取当前选中的支付方式
+  public getSelectedMethod(): PaymentMethod | null {
+    return this.selectedMethod
+  }
+
+  // 设置点击遮罩层是否关闭
+  public setCloseOnOverlayClick(close: boolean) {
+    this.closeOnOverlayClick = close
+    this.setAttribute('close-on-overlay-click', String(close))
+
+    // 重新设置事件监听
+    if (this.overlay) {
+      // 移除旧的事件监听器（需要重新绑定）
+      const newOverlay = this.overlay.cloneNode(true) as HTMLElement
+      if (this.overlay.parentNode) {
+        this.overlay.parentNode.replaceChild(newOverlay, this.overlay)
+        this.overlay = newOverlay
+      }
+
+      if (this.closeOnOverlayClick) {
+        this.overlay.addEventListener('click', () => {
+          this.close()
+        })
+      }
+    }
+  }
 }
 
 // 注册自定义元素
 if (!customElements.get('payment-panel')) {
   customElements.define('payment-panel', PaymentPanel)
 }
+
+// 导出类型
+export type { PaymentMethod, FieldMapping }
 
 export default PaymentPanel
