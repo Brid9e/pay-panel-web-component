@@ -121,69 +121,33 @@
 
       <div class="demo-section">
         <h2>基础用法</h2>
-        <button class="btn" onclick="openPaymentPanel()">打开支付面板</button>
-        <div class="info">
-          点击按钮打开支付面板，支持从下而上滑出动画<br />
-          提示：可以通过向下拖拽来关闭面板（拖拽手柄或标题栏区域）
-        </div>
-      </div>
-
-      <div class="demo-section">
-        <h2>设置金额</h2>
-        <button class="btn" onclick="openPaymentPanelWithAmount(99.99)">
-          打开支付面板 (¥99.99)
-        </button>
-        <button
-          class="btn btn-secondary"
-          onclick="openPaymentPanelWithAmount(199.00)">
-          打开支付面板 (¥199.00)
-        </button>
-        <div class="info">
-          可以在打开时传入金额，也可以使用 setAmount() 方法动态设置
-        </div>
-      </div>
-
-      <div class="demo-section">
-        <h2>事件监听</h2>
-        <button class="btn" onclick="openPaymentPanelWithEvents()">
-          打开支付面板（带事件）
-        </button>
+        <button class="btn" onclick="openBasicPanel()">打开支付面板</button>
         <div class="info" id="eventInfo">事件信息将显示在这里</div>
       </div>
 
       <div class="demo-section">
-        <h2>自定义阈值</h2>
-        <button class="btn" onclick="openPaymentPanelWithCustomThreshold()">
-          打开支付面板（自定义阈值）
+        <h2>统一配置</h2>
+        <button class="btn" onclick="openPanelWithConfig()">
+          打开支付面板（禁止下拉关闭 + 密码输入）
+        </button>
+        <button class="btn btn-secondary" onclick="openPanelWithCustomMethods()">
+          打开支付面板（自定义支付方式 + 多个选项）
+        </button>
+        <button class="btn btn-secondary" onclick="openPanelWithCustomTitle()">
+          打开支付面板（自定义标题）
         </button>
         <div class="info">
-          可以通过方法自定义关闭阈值：<br />
-          • setCloseThreshold: 关闭距离阈值（像素，默认100px）<br />
-          • setCloseThresholdPercent: 关闭距离阈值（百分比，默认0.3即30%）<br />
-          • setVelocityThreshold: 速度阈值（像素/毫秒，默认0.5）
-        </div>
-      </div>
-
-      <div class="demo-section">
-        <h2>自定义支付方式</h2>
-        <button class="btn" onclick="openPaymentPanelWithCustomMethods()">
-          打开支付面板（自定义支付方式）
-        </button>
-        <div class="info">
-          可以通过 setPaymentMethods 方法自定义支付方式列表和字段映射
-        </div>
-      </div>
-
-      <div class="demo-section">
-        <h2>遮罩层点击行为</h2>
-        <button class="btn" onclick="openPaymentPanelWithoutOverlayClose()">
-          打开支付面板（点击遮罩不关闭）
-        </button>
-        <button class="btn btn-secondary" onclick="openPaymentPanelWithOverlayClose()">
-          打开支付面板（点击遮罩关闭，默认）
-        </button>
-        <div class="info">
-          使用 setCloseOnOverlayClick(false) 可以禁用点击遮罩层关闭功能
+          使用 setConfig() 方法统一配置所有选项：<br />
+          • allowSwipeToClose: 是否允许下拉关闭（false时隐藏拖动滑块）<br />
+          • closeOnOverlayClick: 点击遮罩层是否关闭<br />
+          • enablePassword: 是否启用密码输入<br />
+          • passwordLength: 密码位数（默认6位）<br />
+          • headerTitle: 标题文本（默认"支付"）<br />
+          • closeThreshold: 关闭距离阈值（像素）<br />
+          • closeThresholdPercent: 关闭距离阈值（百分比）<br />
+          • velocityThreshold: 速度阈值（像素/毫秒）<br />
+          <br />
+          也可以使用 setHeaderTitle() 方法单独设置标题
         </div>
       </div>
     </div>
@@ -192,51 +156,74 @@
     <script src="./dist/payment-panel.js"></script>
 
     <script>
-      // 基础打开
-      function openPaymentPanel() {
-        PaymentPanel.open()
+      // 基础用法：打开面板、设置金额、事件监听
+      const eventConfirmHandler = (e) => {
+        const { method, amount, password } = e.detail
+        const info = document.getElementById('eventInfo')
+        if (password) {
+          info.textContent = `支付确认: 方式=${method}, 金额=¥${amount}, 密码=${password}`
+        } else {
+          info.textContent = `支付确认: 方式=${method}, 金额=¥${amount}`
+        }
       }
 
-      // 带金额打开
-      function openPaymentPanelWithAmount(amount) {
-        PaymentPanel.open(amount)
+      const eventCloseHandler = () => {
+        console.log('支付面板已关闭')
       }
 
-      // 带事件监听
-      function openPaymentPanelWithEvents() {
-        // 监听支付确认事件
-        PaymentPanel.on('payment-confirm', (e) => {
-          const { method, amount } = e.detail
-          document.getElementById(
-            'eventInfo'
-          ).textContent = `支付确认: 方式=${method}, 金额=¥${amount}`
+      function openBasicPanel() {
+        // 重置为默认配置
+        PaymentPanel.setConfig({
+          allowSwipeToClose: true,
+          closeOnOverlayClick: false,
+          enablePassword: false
         })
 
-        // 监听关闭事件
-        PaymentPanel.on('payment-close', () => {
-          console.log('支付面板已关闭')
-        })
+        // 监听事件
+        PaymentPanel.on('payment-confirm', eventConfirmHandler)
+        PaymentPanel.on('payment-close', eventCloseHandler)
 
-        PaymentPanel.open(88.88)
+        // 打开面板并设置金额
+        PaymentPanel.open(99.99)
       }
 
-      // 自定义阈值
-      function openPaymentPanelWithCustomThreshold() {
-        // 设置关闭阈值为150px或40%面板高度，速度阈值为0.8px/ms
-        PaymentPanel.setCloseThreshold(150)
-        PaymentPanel.setCloseThresholdPercent(0.4)
-        PaymentPanel.setVelocityThreshold(0.8)
+      // 统一配置示例：禁止下拉关闭 + 密码输入
+      function openPanelWithConfig() {
+        // 使用统一配置方法设置所有选项
+        PaymentPanel.setConfig({
+          allowSwipeToClose: false, // 禁止下拉关闭，拖动滑块会自动隐藏
+          closeOnOverlayClick: false, // 禁止点击遮罩层关闭
+          enablePassword: true, // 启用密码输入
+          passwordLength: 6, // 6位密码
+          closeThreshold: 150, // 关闭距离阈值150px
+          closeThresholdPercent: 0.4, // 关闭距离阈值40%
+          velocityThreshold: 0.8 // 速度阈值0.8px/ms
+        })
+
+        PaymentPanel.on('payment-confirm', eventConfirmHandler)
         PaymentPanel.open(199.99)
       }
 
-      // 自定义支付方式
-      function openPaymentPanelWithCustomMethods() {
-        // 自定义支付方式列表
+      // 自定义支付方式 + 多个选项（测试滚动）
+      function openPanelWithCustomMethods() {
+        // 重置配置
+        PaymentPanel.setConfig({
+          allowSwipeToClose: true,
+          closeOnOverlayClick: true,
+          enablePassword: false
+        })
+
+        // 自定义支付方式列表（多个选项，测试滚动功能）
         PaymentPanel.setPaymentMethods(
           [
             { id: 1, name: '微信支付', desc: '推荐使用', icon: '💳' },
             { id: 2, name: '支付宝', desc: '安全便捷', icon: '💰' },
-            { id: 3, name: 'Apple Pay', desc: '快速支付', icon: '🍎' }
+            { id: 3, name: 'Apple Pay', desc: '快速支付', icon: '🍎' },
+            { id: 4, name: '银行卡', desc: '支持各大银行', icon: '💵' },
+            { id: 5, name: '云闪付', desc: '银联官方', icon: '☁️' },
+            { id: 6, name: '京东支付', desc: '京东用户专享', icon: '🛒' },
+            { id: 7, name: '美团支付', desc: '美团用户专享', icon: '🍔' },
+            { id: 8, name: 'QQ钱包', desc: 'QQ用户专享', icon: '💬' }
           ],
           {
             titleField: 'name', // 使用 name 字段作为标题
@@ -246,25 +233,22 @@
           }
         )
 
-        PaymentPanel.on('payment-confirm', (e) => {
-          console.log('支付确认:', e.detail)
-        })
-
+        PaymentPanel.on('payment-confirm', eventConfirmHandler)
         PaymentPanel.open(299.99)
       }
 
-      // 禁用点击遮罩层关闭
-      function openPaymentPanelWithoutOverlayClose() {
-        // 设置点击遮罩层不关闭
-        PaymentPanel.setCloseOnOverlayClick(false)
-        PaymentPanel.open(199.99)
-      }
+      // 自定义标题示例
+      function openPanelWithCustomTitle() {
+        // 使用 setConfig 设置标题
+        PaymentPanel.setConfig({
+          headerTitle: '确认付款'
+        })
 
-      // 启用点击遮罩层关闭（默认）
-      function openPaymentPanelWithOverlayClose() {
-        // 设置点击遮罩层关闭（默认行为）
-        PaymentPanel.setCloseOnOverlayClick(true)
-        PaymentPanel.open(199.99)
+        // 或者使用 setHeaderTitle 方法
+        // PaymentPanel.setHeaderTitle('确认付款')
+
+        PaymentPanel.on('payment-confirm', eventConfirmHandler)
+        PaymentPanel.open(88.88)
       }
     </script>
   </body>

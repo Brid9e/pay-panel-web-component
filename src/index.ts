@@ -1,4 +1,4 @@
-import PaymentPanel, { PaymentMethod, FieldMapping } from './payment-panel'
+import PaymentPanel, { PaymentMethod, FieldMapping, PaymentPanelConfig } from './payment-panel'
 
 // 确保自定义元素已注册
 if (typeof window !== 'undefined' && !customElements.get('payment-panel')) {
@@ -53,7 +53,7 @@ const PaymentPanelAPI = {
   },
 
   // 设置支付方式列表
-  setPaymentMethods(methods: PaymentMethod[], fieldMapping?: FieldMapping) {
+  setPaymentMethods(methods?: PaymentMethod[], fieldMapping?: FieldMapping) {
     getInstance().setPaymentMethods(methods, fieldMapping)
   },
 
@@ -80,14 +80,68 @@ const PaymentPanelAPI = {
     getInstance().setCloseOnOverlayClick(close)
   },
 
-  // 监听事件
+  // 设置是否启用密码输入
+  setEnablePassword(enable: boolean) {
+    getInstance().setEnablePassword(enable)
+  },
+
+  // 设置密码位数
+  setPasswordLength(length: number) {
+    getInstance().setPasswordLength(length)
+  },
+
+  // 统一配置方法
+  setConfig(config: PaymentPanelConfig) {
+    getInstance().setConfig(config)
+  },
+
+  // 设置标题
+  setHeaderTitle(title: string) {
+    getInstance().setHeaderTitle(title)
+  },
+
+  // 重置为默认配置
+  resetConfig() {
+    getInstance().resetConfig()
+  },
+
+  // 监听事件（自动去重，同一个handler只会添加一次）
   on(event: 'payment-confirm' | 'payment-close', handler: (e: CustomEvent) => void) {
-    getInstance().addEventListener(event, handler as EventListener)
+    const instance = getInstance()
+    // 先移除，避免重复添加
+    instance.removeEventListener(event, handler as EventListener)
+    // 再添加
+    instance.addEventListener(event, handler as EventListener)
   },
 
   // 移除事件监听
   off(event: 'payment-confirm' | 'payment-close', handler: (e: CustomEvent) => void) {
     getInstance().removeEventListener(event, handler as EventListener)
+  },
+
+  // 移除所有事件监听
+  removeAllListeners(event?: 'payment-confirm' | 'payment-close') {
+    const instance = getInstance()
+    if (event) {
+      // 克隆元素以移除所有监听器（简单方法）
+      const newElement = instance.cloneNode(true) as PaymentPanel
+      if (instance.parentNode) {
+        instance.parentNode.replaceChild(newElement, instance)
+        // 重新初始化
+        if (globalInstance === instance) {
+          globalInstance = newElement
+        }
+      }
+    } else {
+      // 移除所有事件监听
+      const newElement = instance.cloneNode(true) as PaymentPanel
+      if (instance.parentNode) {
+        instance.parentNode.replaceChild(newElement, instance)
+        if (globalInstance === instance) {
+          globalInstance = newElement
+        }
+      }
+    }
   }
 }
 
@@ -97,5 +151,5 @@ if (typeof window !== 'undefined') {
 }
 
 // 导出
-export { PaymentPanelAPI, PaymentMethod, FieldMapping }
+export { PaymentPanelAPI, PaymentMethod, FieldMapping, PaymentPanelConfig }
 export default PaymentPanelAPI
