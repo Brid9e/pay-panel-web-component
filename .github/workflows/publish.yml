@@ -27,6 +27,8 @@ jobs:
           node-version: '20'
           registry-url: 'https://registry.npmjs.org'
           cache: 'pnpm'
+          # Using OIDC authentication (Trusted Publishing)
+          # No NODE_AUTH_TOKEN needed if Trusted Publishing is configured
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -36,8 +38,8 @@ jobs:
 
       - name: Publish to npm
         run: pnpm publish --no-git-checks
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        # Note: For better security, consider using npm Trusted Publishing instead of NPM_TOKEN
-        # Setup: https://docs.npmjs.com/trusted-publishing
-        # After setup, you can remove the NODE_AUTH_TOKEN env and use OIDC authentication
+        # Using OIDC authentication (Trusted Publishing)
+        # Make sure Trusted Publishing is configured in npm: https://docs.npmjs.com/trusted-publishing
+        # If not configured, uncomment the env below and add NPM_TOKEN to GitHub Secrets
+        # env:
+        #   NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
