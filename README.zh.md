@@ -2,26 +2,6 @@
 
 一个简单易用的支付面板。
 
-## 安装
-
-```bash
-pnpm install
-```
-
-## 开发
-
-```bash
-pnpm run dev
-```
-
-## 构建
-
-```bash
-pnpm run build
-```
-
-构建完成后，会在 `dist` 目录生成 `index.js` 文件。
-
 ## 使用方法
 
 ### 1. 引入组件
