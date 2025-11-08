@@ -14,7 +14,8 @@ const DEFAULT_CONFIG: Required<Omit<PaymentPanelConfig, 'theme'>> = {
   enablePassword: false,
   passwordLength: 6,
   headerTitle: '支付',
-  amountLabel: '支付金额'
+  amountLabel: '支付金额',
+  iconDisplay: 'always'
 }
 
 /**
@@ -48,6 +49,7 @@ class PaymentPanel extends HTMLElement {
   private currentPassword: string = '' // 当前输入的密码
   private headerTitle: string = DEFAULT_CONFIG.headerTitle
   private amountLabel: string = DEFAULT_CONFIG.amountLabel
+  private iconDisplay: 'always' | 'never' | 'auto' = DEFAULT_CONFIG.iconDisplay
 
   // 主题配置
   private theme: PaymentPanelConfig['theme'] = {}
@@ -613,6 +615,48 @@ class PaymentPanel extends HTMLElement {
           align-items: center;
           justify-content: center;
           font-size: 18px;
+          flex-shrink: 0;
+          border-radius: 4px;
+          overflow: hidden;
+          background-color: var(--bg-button-secondary-light);
+        }
+
+        :host([data-theme="dark"]) .payment-icon {
+          background-color: var(--bg-button-secondary-dark);
+        }
+
+        .payment-icon.hidden {
+          display: none;
+        }
+
+        .payment-icon img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+
+        .payment-icon .icon-text {
+          font-size: 14px;
+          font-weight: 500;
+          color: var(--text-primary-light);
+        }
+
+        :host([data-theme="dark"]) .payment-icon .icon-text {
+          color: var(--text-primary-dark);
+        }
+
+        .payment-icon .icon-default {
+          width: 16px;
+          height: 16px;
+          opacity: 0.6;
+        }
+
+        .payment-icon .icon-default path {
+          fill: var(--text-secondary-light);
+        }
+
+        :host([data-theme="dark"]) .payment-icon .icon-default path {
+          fill: var(--text-secondary-dark);
         }
 
         .payment-info {
@@ -1059,6 +1103,73 @@ class PaymentPanel extends HTMLElement {
   }
 
   /**
+   * 渲染图标HTML
+   * 根据 iconDisplay 配置和 icon 类型渲染不同的图标
+   * @param {string} icon - 图标值（可能是图片URL或字符串）
+   * @returns {string} 图标HTML字符串
+   * @author Brid9e
+   */
+  private renderIcon(icon: string): string {
+    // 判断是否应该显示图标
+    const shouldShowIcon = () => {
+      if (this.iconDisplay === 'never') return false
+      if (this.iconDisplay === 'always') return true
+      // auto 模式：有icon值则显示
+      return !!icon
+    }
+
+    if (!shouldShowIcon()) {
+      return '<div class="payment-icon hidden"></div>'
+    }
+
+    // 如果没有icon值，在auto模式下不显示
+    if (!icon && this.iconDisplay === 'auto') {
+      return '<div class="payment-icon hidden"></div>'
+    }
+
+    // 判断是否为图片URL（简单判断：以 http:// 或 https:// 开头，或包含 .jpg/.png/.svg 等）
+    const isImageUrl = (str: string): boolean => {
+      return /^(https?:\/\/|data:image|\.(jpg|jpeg|png|gif|svg|webp|bmp))/i.test(str.trim())
+    }
+
+    const defaultIconSvg = `
+      <svg class="icon-default" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+      </svg>
+    `
+
+    if (isImageUrl(icon)) {
+      // 图片URL：使用img标签，添加错误处理
+      const uniqueId = `icon-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+      return `
+        <div class="payment-icon" data-icon-id="${uniqueId}" data-icon-type="image">
+          <img src="${icon.replace(/"/g, '&quot;')}" alt="" data-icon-fallback="${uniqueId}" />
+        </div>
+      `
+    } else if (icon) {
+      // 字符串：判断是否为 emoji 或短字符串
+      const trimmedIcon = icon.trim()
+      // 如果长度 <= 2，可能是 emoji，显示完整字符串
+      // 如果长度 > 2，取第一个字符（使用 Array.from 正确处理多字节字符）
+      const displayText = trimmedIcon.length <= 2
+        ? trimmedIcon
+        : Array.from(trimmedIcon)[0] || trimmedIcon.charAt(0) || ''
+      return `
+        <div class="payment-icon">
+          <span class="icon-text">${displayText}</span>
+        </div>
+      `
+    } else {
+      // 没有icon值：显示默认SVG
+      return `
+        <div class="payment-icon">
+          ${defaultIconSvg}
+        </div>
+      `
+    }
+  }
+
+  /**
    * 渲染支付方式列表
    * 支持普通列表和二级分组列表，处理展开/折叠功能
    * @author Brid9e
@@ -1110,13 +1221,13 @@ class PaymentPanel extends HTMLElement {
               const value = String(getField(child, valueField, ['value', 'id', 'code']) || itemIndex)
               const childTitle = String(getField(child, titleField, ['title', 'name', 'label']) || '')
               const childSubtitle = String(getField(child, subtitleField, ['subtitle', 'desc', 'description']) || '')
-              const icon = String(getField(child, iconField, ['icon', 'emoji']) || '💳')
+              const icon = String(getField(child, iconField, ['icon', 'emoji']) || '')
               const isSelected = this.selectedMethod === child
               const currentIndex = itemIndex++
 
               return `
                 <div class="payment-method ${isSelected ? 'selected' : ''}" data-method="${value}" data-index="${currentIndex}" data-group-index="${groupIndex}">
-                  <div class="payment-icon">${icon}</div>
+                  ${this.renderIcon(icon)}
                   <div class="payment-info">
                     <div class="payment-name">${childTitle}</div>
                     ${childSubtitle ? `<div class="payment-desc">${childSubtitle}</div>` : ''}
@@ -1153,13 +1264,13 @@ class PaymentPanel extends HTMLElement {
           const value = String(getField(method, valueField, ['value', 'id', 'code']) || itemIndex)
           const title = String(getField(method, titleField, ['title', 'name', 'label']) || '')
           const subtitle = String(getField(method, subtitleField, ['subtitle', 'desc', 'description']) || '')
-          const icon = String(getField(method, iconField, ['icon', 'emoji']) || '💳')
+          const icon = String(getField(method, iconField, ['icon', 'emoji']) || '')
           const isSelected = this.selectedMethod === method || (itemIndex === 0 && !this.selectedMethod)
           const currentIndex = itemIndex++
 
           return `
             <div class="payment-method ${isSelected ? 'selected' : ''}" data-method="${value}" data-index="${currentIndex}">
-              <div class="payment-icon">${icon}</div>
+              ${this.renderIcon(icon)}
               <div class="payment-info">
                 <div class="payment-name">${title}</div>
                 ${subtitle ? `<div class="payment-desc">${subtitle}</div>` : ''}
@@ -1186,6 +1297,22 @@ class PaymentPanel extends HTMLElement {
           this.expandedGroups.add(groupIndex)
         }
         this.renderPaymentMethods()
+      })
+    })
+
+    // 设置图片加载失败处理
+    const defaultIconSvg = `
+      <svg class="icon-default" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+      </svg>
+    `
+    container.querySelectorAll('img[data-icon-fallback]').forEach(img => {
+      img.addEventListener('error', () => {
+        const iconContainer = img.closest('.payment-icon[data-icon-type="image"]') as HTMLElement
+        if (iconContainer) {
+          iconContainer.innerHTML = defaultIconSvg
+          iconContainer.removeAttribute('data-icon-type')
+        }
       })
     })
   }
@@ -1808,6 +1935,14 @@ class PaymentPanel extends HTMLElement {
       ? (config.amountLabel || DEFAULT_CONFIG.amountLabel)
       : DEFAULT_CONFIG.amountLabel
     this.updateAmountLabel()
+
+    this.iconDisplay = config.iconDisplay !== undefined
+      ? config.iconDisplay
+      : DEFAULT_CONFIG.iconDisplay
+    // 如果修改了图标显示模式，需要重新渲染支付方式列表
+    if (config.iconDisplay !== undefined) {
+      this.renderPaymentMethods()
+    }
 
     // 设置主题
     if (config.theme !== undefined) {

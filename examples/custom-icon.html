@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>自定义图标 - 支付面板组件示例</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans',
+          Helvetica, Arial, sans-serif;
+        padding: 20px;
+        background-color: #f6f8fa;
+        min-height: 100vh;
+      }
+
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 40px 20px;
+      }
+
+      h1 {
+        text-align: center;
+        margin-bottom: 40px;
+        color: #24292f;
+      }
+
+      .demo-section {
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 24px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+
+      .demo-section h2 {
+        font-size: 18px;
+        margin-bottom: 16px;
+        color: #24292f;
+      }
+
+      .btn {
+        padding: 12px 24px;
+        background-color: #238636;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 16px;
+        font-weight: 500;
+        cursor: pointer;
+        width: 100%;
+        margin-bottom: 12px;
+        transition: background-color 0.2s ease;
+      }
+
+      .btn:hover {
+        background-color: #2ea043;
+      }
+
+      .btn-secondary {
+        background-color: #f6f8fa;
+        color: #24292f;
+      }
+
+      .btn-secondary:hover {
+        background-color: #f3f4f6;
+      }
+
+      .info {
+        margin-top: 16px;
+        padding: 12px;
+        background-color: #f6f8fa;
+        border-radius: 6px;
+        font-size: 14px;
+        color: #57606a;
+        line-height: 1.6;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        body {
+          background-color: #0d1117;
+        }
+
+        h1 {
+          color: #e6edf3;
+        }
+
+        .demo-section {
+          background: #161b22;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        .demo-section h2 {
+          color: #e6edf3;
+        }
+
+        .btn-secondary {
+          background-color: #21262d;
+          color: #e6edf3;
+        }
+
+        .btn-secondary:hover {
+          background-color: #30363d;
+        }
+
+        .info {
+          background-color: #21262d;
+          color: #8b949e;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>自定义图标显示</h1>
+
+      <div class="demo-section">
+        <h2>图标显示模式：always（默认）</h2>
+        <button class="btn" onclick="openPanelWithAlwaysMode()">
+          总是显示图标
+        </button>
+        <div class="info">
+          使用 iconDisplay: 'always'，无论是否有 icon 值都会显示图标区域<br />
+          • 图片URL：显示图片（object-fit: cover）<br />
+          • 字符串：显示第一个字符<br />
+          • 无icon：显示默认SVG图标
+        </div>
+      </div>
+
+      <div class="demo-section">
+        <h2>图标显示模式：auto</h2>
+        <button class="btn" onclick="openPanelWithAutoMode()">
+          有icon时显示
+        </button>
+        <div class="info">
+          使用 iconDisplay: 'auto'，只有存在 icon 值时才显示图标<br />
+          • 有icon值：正常显示（图片/字符/默认图标）<br />
+          • 无icon值：不显示图标区域
+        </div>
+      </div>
+
+      <div class="demo-section">
+        <h2>图标显示模式：never</h2>
+        <button class="btn" onclick="openPanelWithNeverMode()">
+          不显示图标
+        </button>
+        <div class="info">
+          使用 iconDisplay: 'never'，完全不显示图标区域
+        </div>
+      </div>
+
+      <div class="demo-section">
+        <h2>混合示例：图片URL + 字符串 + 无图标</h2>
+        <button class="btn btn-secondary" onclick="openPanelWithMixedIcons()">
+          打开混合图标示例
+        </button>
+        <div class="info">
+          展示不同类型的图标：<br />
+          • 图片URL（微信支付、支付宝图标）<br />
+          • 字符串（显示第一个字符）<br />
+          • 无图标（显示默认SVG）
+        </div>
+      </div>
+
+      <div class="demo-section">
+        <h2>图片加载失败示例</h2>
+        <button class="btn btn-secondary" onclick="openPanelWithFailedImage()">
+          打开失败图片示例
+        </button>
+        <div class="info">
+          当图片URL加载失败时，自动显示默认SVG图标
+        </div>
+      </div>
+    </div>
+
+    <!-- 引入打包后的组件 -->
+    <script src="../dist/payment-panel.js"></script>
+
+    <script>
+      const eventConfirmHandler = (e) => {
+        const { method, amount, password } = e.detail
+        if (password) {
+          console.log(`支付确认: 方式=${method}, 金额=¥${amount}, 密码=${password}`)
+        } else {
+          console.log(`支付确认: 方式=${method}, 金额=¥${amount}`)
+        }
+      }
+
+      // always 模式：总是显示图标
+      function openPanelWithAlwaysMode() {
+        PaymentPanel.setConfig({
+          iconDisplay: 'always',
+          headerTitle: '支付方式'
+        })
+
+        PaymentPanel.setPaymentMethods([
+          {
+            value: 'wechat',
+            title: '微信支付',
+            subtitle: '推荐使用',
+            icon: 'https://res.wx.qq.com/a/wx_fed/assets/res/OTE0YTAw.png' // 微信支付图标
+          },
+          {
+            value: 'alipay',
+            title: '支付宝',
+            subtitle: '安全便捷',
+            icon: 'https://i.alipayobjects.com/common/favicon/favicon.ico' // 支付宝图标
+          },
+          {
+            value: 'card',
+            title: '银行卡',
+            subtitle: '支持各大银行'
+            // 无icon，显示默认SVG
+          }
+        ])
+
+        PaymentPanel.on('payment-confirm', eventConfirmHandler)
+        PaymentPanel.open(199.99)
+      }
+
+      // auto 模式：有icon时显示
+      function openPanelWithAutoMode() {
+        PaymentPanel.setConfig({
+          iconDisplay: 'auto',
+          headerTitle: '支付方式'
+        })
+
+        PaymentPanel.setPaymentMethods([
+          {
+            value: 'wechat',
+            title: '微信支付',
+            subtitle: '推荐使用',
+            icon: '💳' // 有icon，显示
+          },
+          {
+            value: 'alipay',
+            title: '支付宝',
+            subtitle: '安全便捷',
+            icon: '💰' // 有icon，显示
+          },
+          {
+            value: 'card',
+            title: '银行卡',
+            subtitle: '支持各大银行'
+            // 无icon，不显示图标区域
+          }
+        ])
+
+        PaymentPanel.on('payment-confirm', eventConfirmHandler)
+        PaymentPanel.open(199.99)
+      }
+
+      // never 模式：不显示图标
+      function openPanelWithNeverMode() {
+        PaymentPanel.setConfig({
+          iconDisplay: 'never',
+          headerTitle: '支付方式'
+        })
+
+        PaymentPanel.setPaymentMethods([
+          {
+            value: 'wechat',
+            title: '微信支付',
+            subtitle: '推荐使用',
+            icon: '💳' // 即使有icon也不显示
+          },
+          {
+            value: 'alipay',
+            title: '支付宝',
+            subtitle: '安全便捷',
+            icon: '💰'
+          },
+          {
+            value: 'card',
+            title: '银行卡',
+            subtitle: '支持各大银行'
+          }
+        ])
+
+        PaymentPanel.on('payment-confirm', eventConfirmHandler)
+        PaymentPanel.open(199.99)
+      }
+
+      // 混合示例：图片URL + 字符串 + 无图标
+      function openPanelWithMixedIcons() {
+        PaymentPanel.setConfig({
+          iconDisplay: 'always',
+          headerTitle: '支付方式'
+        })
+
+        PaymentPanel.setPaymentMethods([
+          {
+            value: 'wechat',
+            title: '微信支付',
+            subtitle: '推荐使用',
+            icon: 'https://res.wx.qq.com/a/wx_fed/assets/res/OTE0YTAw.png' // 图片URL
+          },
+          {
+            value: 'alipay',
+            title: '支付宝',
+            subtitle: '安全便捷',
+            icon: 'https://i.alipayobjects.com/common/favicon/favicon.ico' // 支付宝图标
+          },
+          {
+            value: 'card',
+            title: '银行卡',
+            subtitle: '支持各大银行'
+            // 无icon，显示默认SVG
+          },
+          {
+            value: 'apple',
+            title: 'Apple Pay',
+            subtitle: '快速支付',
+            icon: '🍎' // emoji字符串
+          }
+        ])
+
+        PaymentPanel.on('payment-confirm', eventConfirmHandler)
+        PaymentPanel.open(299.99)
+      }
+
+      // 图片加载失败示例
+      function openPanelWithFailedImage() {
+        PaymentPanel.setConfig({
+          iconDisplay: 'always',
+          headerTitle: '支付方式'
+        })
+
+        PaymentPanel.setPaymentMethods([
+          {
+            value: 'wechat',
+            title: '微信支付',
+            subtitle: '推荐使用',
+            icon: 'https://invalid-url.com/image.png' // 无效的图片URL，会加载失败
+          },
+          {
+            value: 'alipay',
+            title: '支付宝',
+            subtitle: '安全便捷',
+            icon: 'https://another-invalid-url.com/icon.jpg' // 无效的图片URL
+          },
+          {
+            value: 'card',
+            title: '银行卡',
+            subtitle: '支持各大银行',
+            icon: '💳' // 正常显示
+          }
+        ])
+
+        PaymentPanel.on('payment-confirm', eventConfirmHandler)
+        PaymentPanel.open(199.99)
+      }
+    </script>
+  </body>
+</html>

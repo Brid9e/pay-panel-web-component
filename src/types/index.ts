@@ -82,6 +82,9 @@ export interface PaymentPanelConfig {
   /** 金额标签文本，默认 "支付金额" */
   amountLabel?: string
 
+  /** 图标显示模式，默认 "always" */
+  iconDisplay?: 'always' | 'never' | 'auto'
+
   /** 主题配置 */
   theme?: ThemeConfig
 }
