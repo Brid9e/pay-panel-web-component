@@ -28,7 +28,7 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
           cache: 'pnpm'
           # Using OIDC authentication (Trusted Publishing)
-          # No NODE_AUTH_TOKEN needed if Trusted Publishing is configured
+          # setup-node@v4 automatically uses OIDC when registry-url is set
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
