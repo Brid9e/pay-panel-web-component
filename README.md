@@ -402,4 +402,4 @@ pypjs.setConfig({
 
 ## License
 
-ISC
+MIT
