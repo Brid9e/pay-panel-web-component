@@ -37,7 +37,7 @@ jobs:
         run: pnpm run build
 
       - name: Publish to npm
-        run: pnpm publish --no-git-checks --access public
+        run: npm publish --access public
         # Using OIDC authentication (Trusted Publishing)
         # Make sure Trusted Publishing is configured in npm: https://docs.npmjs.com/trusted-publishing
         # If not configured, uncomment the env below and add NPM_TOKEN to GitHub Secrets
