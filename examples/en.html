@@ -118,7 +118,7 @@
   </head>
   <body>
     <div class="container">
-      <h1>Payment Panel Component Examples</h1>
+      <h1>PYPJS Examples</h1>
 
       <!-- Basic Usage -->
       <div class="demo-section">
@@ -365,7 +365,7 @@
         console.log(e.detail)
         const { method, amount, password, methodData } = e.detail
         const info = document.getElementById('eventInfo')
-        let message = `Payment confirmed: Method=${method}, Amount=¥${amount}`
+        let message = `Payment confirmed: Method=${method}, Amount=${amount}`
         if (password) {
           message += `, Password=${password}`
         }
