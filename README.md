@@ -1,6 +1,6 @@
-# papjs
+# pypjs
 
-A simple and easy-to-use payment panel.
+A simple and easy-to-use payment panel component.
 
 ## Usage
 

@@ -1,7 +1,7 @@
 {
-  "name": "papjs",
-  "version": "1.0.0",
-  "description": "A simple and easy-to-use payment panel",
+  "name": "pypjs",
+  "version": "0.0.1-alpha.1",
+  "description": "A simple and easy-to-use payment panel component",
   "main": "dist/index.js",
   "packageManager": "pnpm@8.0.0",
   "files": [
