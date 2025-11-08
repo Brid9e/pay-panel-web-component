@@ -4,15 +4,25 @@
   "description": "移动端支付面板Web Component组件",
   "main": "dist/payment-panel.js",
   "packageManager": "pnpm@8.0.0",
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "scripts": {
     "build": "rollup -c",
     "dev": "rollup -c -w",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": ["web-component", "payment", "panel", "mobile"],
+  "keywords": [
+    "web-component",
+    "payment",
+    "panel",
+    "mobile"
+  ],
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^11.1.5",
     "@types/node": "^20.10.0",
     "rollup": "^4.6.0",

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>自定义支付方式 - 支付面板组件示例</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans',
+          Helvetica, Arial, sans-serif;
+        padding: 20px;
+        background-color: #f6f8fa;
+        min-height: 100vh;
+      }
+
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 40px 20px;
+      }
+
+      h1 {
+        text-align: center;
+        margin-bottom: 40px;
+        color: #24292f;
+      }
+
+      .demo-section {
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 24px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+
+      .demo-section h2 {
+        font-size: 18px;
+        margin-bottom: 16px;
+        color: #24292f;
+      }
+
+      .btn {
+        padding: 12px 24px;
+        background-color: #238636;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 16px;
+        font-weight: 500;
+        cursor: pointer;
+        width: 100%;
+        margin-bottom: 12px;
+        transition: background-color 0.2s ease;
+      }
+
+      .btn:hover {
+        background-color: #2ea043;
+      }
+
+      .info {
+        margin-top: 16px;
+        padding: 12px;
+        background-color: #f6f8fa;
+        border-radius: 6px;
+        font-size: 14px;
+        color: #57606a;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        body {
+          background-color: #0d1117;
+        }
+
+        h1 {
+          color: #e6edf3;
+        }
+
+        .demo-section {
+          background: #161b22;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        .demo-section h2 {
+          color: #e6edf3;
+        }
+
+        .info {
+          background-color: #21262d;
+          color: #8b949e;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>自定义支付方式</h1>
+
+      <div class="demo-section">
+        <h2>自定义支付方式 + 二级分组</h2>
+        <button class="btn" onclick="openPanelWithCustomMethods()">
+          打开支付面板
+        </button>
+        <div class="info">
+          支持自定义支付方式列表，支持二级分组结构，点击分组标题可展开/折叠子项
+        </div>
+      </div>
+    </div>
+
+    <!-- 引入打包后的组件 -->
+    <script src="../dist/payment-panel.js"></script>
+
+    <script>
+      const eventConfirmHandler = (e) => {
+        const { method, amount, password } = e.detail
+        if (password) {
+          console.log(`支付确认: 方式=${method}, 金额=¥${amount}, 密码=${password}`)
+        } else {
+          console.log(`支付确认: 方式=${method}, 金额=¥${amount}`)
+        }
+      }
+
+      // 自定义支付方式 + 多个选项（测试滚动）
+      function openPanelWithCustomMethods() {
+        // 重置配置
+        PaymentPanel.setConfig({
+          allowSwipeToClose: true,
+          closeOnOverlayClick: true,
+          enablePassword: false
+        })
+
+        // 自定义支付方式列表（支持二级结构）
+        PaymentPanel.setPaymentMethods(
+          [
+            {
+              name: '在线支付',
+              children: [
+                { id: 1, name: '微信支付', desc: '推荐使用', icon: '💳' },
+                { id: 2, name: '支付宝', desc: '安全便捷', icon: '💰' },
+                { id: 3, name: 'Apple Pay', desc: '快速支付', icon: '🍎' }
+              ]
+            },
+            {
+              name: '银行卡支付',
+              children: [
+                { id: 4, name: '储蓄卡', desc: '支持各大银行', icon: '💵' },
+                { id: 5, name: '信用卡', desc: '支持各大银行', icon: '💳' }
+              ]
+            },
+            {
+              name: '其他支付',
+              children: [
+                { id: 6, name: '云闪付', desc: '银联官方', icon: '☁️' },
+                { id: 7, name: '京东支付', desc: '京东用户专享', icon: '🛒' },
+                { id: 8, name: '美团支付', desc: '美团用户专享', icon: '🍔' },
+                { id: 9, name: 'QQ钱包', desc: 'QQ用户专享', icon: '💬' }
+              ]
+            }
+          ],
+          {
+            titleField: 'name', // 使用 name 字段作为标题
+            subtitleField: 'desc', // 使用 desc 字段作为副标题
+            iconField: 'icon', // 使用 icon 字段作为图标
+            valueField: 'id' // 使用 id 字段作为值
+          }
+        )
+
+        PaymentPanel.on('payment-confirm', eventConfirmHandler)
+        PaymentPanel.open(299.99)
+      }
+    </script>
+  </body>
+</html>

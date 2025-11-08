@@ -128,13 +128,15 @@
       <div class="demo-section">
         <h2>统一配置</h2>
         <button class="btn" onclick="openPanelWithConfig()">
-          打开支付面板（禁止下拉关闭 + 密码输入）
+          禁止下拉关闭 + 密码输入
         </button>
-        <button class="btn btn-secondary" onclick="openPanelWithCustomMethods()">
-          打开支付面板（自定义支付方式 + 多个选项）
+        <button
+          class="btn btn-secondary"
+          onclick="openPanelWithCustomMethods()">
+          自定义支付方式 + 多个选项
         </button>
         <button class="btn btn-secondary" onclick="openPanelWithCustomTitle()">
-          打开支付面板（自定义标题）
+          自定义标题
         </button>
         <div class="info">
           使用 setConfig() 方法统一配置所有选项：<br />
@@ -150,10 +152,31 @@
           也可以使用 setHeaderTitle() 方法单独设置标题
         </div>
       </div>
+
+      <div class="demo-section">
+        <h2>主题配色设置</h2>
+        <button class="btn" onclick="openPanelWithRedTheme()">
+          自定义主题色
+        </button>
+        <div class="info">
+          使用 setTheme() 方法自定义主题配色：<br />
+          • primaryColor: 主色调（用于按钮、选中状态等）<br />
+          • primaryHoverColor: 主色调悬停色<br />
+          • overlayColor: 遮罩层颜色<br />
+          • panelBgLight: 浅色模式下面板背景色<br />
+          • panelBgDark: 深色模式下面板背景色<br />
+          • textPrimaryLight: 浅色模式下主文本色<br />
+          • textPrimaryDark: 深色模式下主文本色<br />
+          • textSecondaryLight: 浅色模式下次要文本色<br />
+          • textSecondaryDark: 深色模式下次要文本色<br />
+          <br />
+          也可以在 setConfig() 中通过 theme 属性设置主题
+        </div>
+      </div>
     </div>
 
     <!-- 引入打包后的组件 -->
-    <script src="./dist/payment-panel.js"></script>
+    <script src="../dist/payment-panel.js"></script>
 
     <script>
       // 基础用法：打开面板、设置金额、事件监听
@@ -165,6 +188,7 @@
         } else {
           info.textContent = `支付确认: 方式=${method}, 金额=¥${amount}`
         }
+        console.log('\x1b[32m%s\x1b[0m', info.textContent)
       }
 
       const eventCloseHandler = () => {
@@ -213,17 +237,33 @@
           enablePassword: false
         })
 
-        // 自定义支付方式列表（多个选项，测试滚动功能）
+        // 自定义支付方式列表（支持二级结构）
         PaymentPanel.setPaymentMethods(
           [
-            { id: 1, name: '微信支付', desc: '推荐使用', icon: '💳' },
-            { id: 2, name: '支付宝', desc: '安全便捷', icon: '💰' },
-            { id: 3, name: 'Apple Pay', desc: '快速支付', icon: '🍎' },
-            { id: 4, name: '银行卡', desc: '支持各大银行', icon: '💵' },
-            { id: 5, name: '云闪付', desc: '银联官方', icon: '☁️' },
-            { id: 6, name: '京东支付', desc: '京东用户专享', icon: '🛒' },
-            { id: 7, name: '美团支付', desc: '美团用户专享', icon: '🍔' },
-            { id: 8, name: 'QQ钱包', desc: 'QQ用户专享', icon: '💬' }
+            {
+              name: '在线支付',
+              children: [
+                { id: 1, name: '微信支付', desc: '推荐使用', icon: '💳' },
+                { id: 2, name: '支付宝', desc: '安全便捷', icon: '💰' },
+                { id: 3, name: 'Apple Pay', desc: '快速支付', icon: '🍎' }
+              ]
+            },
+            {
+              name: '银行卡支付',
+              children: [
+                { id: 4, name: '储蓄卡', desc: '支持各大银行', icon: '💵' },
+                { id: 5, name: '信用卡', desc: '支持各大银行', icon: '💳' }
+              ]
+            },
+            {
+              name: '其他支付',
+              children: [
+                { id: 6, name: '云闪付', desc: '银联官方', icon: '☁️' },
+                { id: 7, name: '京东支付', desc: '京东用户专享', icon: '🛒' },
+                { id: 8, name: '美团支付', desc: '美团用户专享', icon: '🍔' },
+                { id: 9, name: 'QQ钱包', desc: 'QQ用户专享', icon: '💬' }
+              ]
+            }
           ],
           {
             titleField: 'name', // 使用 name 字段作为标题
@@ -241,7 +281,7 @@
       function openPanelWithCustomTitle() {
         // 使用 setConfig 设置标题
         PaymentPanel.setConfig({
-          headerTitle: '确认付款'
+          headerTitle: '❤❤❤❤ 爱心支付 ❤❤❤❤'
         })
 
         // 或者使用 setHeaderTitle 方法
@@ -249,6 +289,46 @@
 
         PaymentPanel.on('payment-confirm', eventConfirmHandler)
         PaymentPanel.open(88.88)
+      }
+
+      // 红色主题示例 - 展示高度自定义配置
+      function openPanelWithRedTheme() {
+        PaymentPanel.setConfig({
+          headerTitle: '确认支付',
+          theme: {
+            // 主色调 - 红色系
+            primaryColor: '#ff4d4f',
+            primaryHoverColor: '#ff7875',
+            // 遮罩层 - 半透明黑色
+            overlayColor: 'rgba(0, 0, 0, 0.6)',
+            // 浅色模式 - 渐变背景
+            panelBgLight: 'linear-gradient(135deg, #fff5f5 0%, #ffe8e8 100%)',
+            // 深色模式 - 深色背景
+            panelBgDark:
+              'linear-gradient(135deg, rgba(49, 44, 0, 1.000) 0.000%, rgba(49, 44, 0, 1.000) 14.286%, rgba(51, 46, 30, 1.000) 14.286%, rgba(51, 46, 30, 1.000) 28.571%, rgba(50, 49, 73, 1.000) 28.571%, rgba(50, 49, 73, 1.000) 42.857%, rgba(44, 51, 119, 1.000) 42.857%, rgba(44, 51, 119, 1.000) 57.143%, rgba(36, 54, 162, 1.000) 57.143%, rgba(36, 54, 162, 1.000) 71.429%, rgba(26, 57, 192, 1.000) 71.429%, rgba(26, 57, 192, 1.000) 85.714%, rgba(17, 60, 204, 1.000) 85.714% 100.000%)',
+            // 浅色模式文本
+            textPrimaryLight: '#8b2635',
+            textSecondaryLight: '#c85a5a',
+            // 深色模式文本 - 暖色调
+            textPrimaryDark: '#ffe0e0',
+            textSecondaryDark: '#ff9999'
+          }
+        })
+
+        // 或者使用 setTheme 方法单独设置主题
+        // PaymentPanel.setTheme({
+        //   primaryColor: '#ff4d4f',
+        //   primaryHoverColor: '#ff7875',
+        //   panelBgLight: 'linear-gradient(135deg, #fff5f5 0%, #ffe8e8 100%)',
+        //   panelBgDark: '#1a0f0f',
+        //   textPrimaryLight: '#8b2635',
+        //   textSecondaryLight: '#c85a5a',
+        //   textPrimaryDark: '#ffe0e0',
+        //   textSecondaryDark: '#ff9999'
+        // })
+
+        PaymentPanel.on('payment-confirm', eventConfirmHandler)
+        PaymentPanel.open(299.99)
       }
     </script>
   </body>

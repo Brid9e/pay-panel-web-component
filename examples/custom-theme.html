@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>自定义主题 - 支付面板组件示例</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans',
+          Helvetica, Arial, sans-serif;
+        padding: 20px;
+        background-color: #f6f8fa;
+        min-height: 100vh;
+      }
+
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 40px 20px;
+      }
+
+      h1 {
+        text-align: center;
+        margin-bottom: 40px;
+        color: #24292f;
+      }
+
+      .demo-section {
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 24px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+
+      .demo-section h2 {
+        font-size: 18px;
+        margin-bottom: 16px;
+        color: #24292f;
+      }
+
+      .btn {
+        padding: 12px 24px;
+        background-color: #238636;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 16px;
+        font-weight: 500;
+        cursor: pointer;
+        width: 100%;
+        margin-bottom: 12px;
+        transition: background-color 0.2s ease;
+      }
+
+      .btn:hover {
+        background-color: #2ea043;
+      }
+
+      .info {
+        margin-top: 16px;
+        padding: 12px;
+        background-color: #f6f8fa;
+        border-radius: 6px;
+        font-size: 14px;
+        color: #57606a;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        body {
+          background-color: #0d1117;
+        }
+
+        h1 {
+          color: #e6edf3;
+        }
+
+        .demo-section {
+          background: #161b22;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        .demo-section h2 {
+          color: #e6edf3;
+        }
+
+        .info {
+          background-color: #21262d;
+          color: #8b949e;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>自定义主题</h1>
+
+      <div class="demo-section">
+        <h2>自定义主题配色</h2>
+        <button class="btn" onclick="openPanelWithRedTheme()">
+          打开支付面板（红色主题）
+        </button>
+        <div class="info">
+          使用 setTheme() 方法自定义主题配色：<br />
+          • primaryColor: 主色调（用于按钮、选中状态等）<br />
+          • primaryHoverColor: 主色调悬停色<br />
+          • overlayColor: 遮罩层颜色<br />
+          • panelBgLight: 浅色模式下面板背景色（支持渐变）<br />
+          • panelBgDark: 深色模式下面板背景色（支持渐变）<br />
+          • textPrimaryLight: 浅色模式下主文本色<br />
+          • textPrimaryDark: 深色模式下主文本色<br />
+          • textSecondaryLight: 浅色模式下次要文本色<br />
+          • textSecondaryDark: 深色模式下次要文本色<br />
+          <br />
+          也可以在 setConfig() 中通过 theme 属性设置主题
+        </div>
+      </div>
+    </div>
+
+    <!-- 引入打包后的组件 -->
+    <script src="../dist/payment-panel.js"></script>
+
+    <script>
+      const eventConfirmHandler = (e) => {
+        const { method, amount, password } = e.detail
+        if (password) {
+          console.log(`支付确认: 方式=${method}, 金额=¥${amount}, 密码=${password}`)
+        } else {
+          console.log(`支付确认: 方式=${method}, 金额=¥${amount}`)
+        }
+      }
+
+      // 红色主题示例 - 展示高度自定义配置
+      function openPanelWithRedTheme() {
+        PaymentPanel.setConfig({
+          headerTitle: '确认支付',
+          theme: {
+            // 主色调 - 红色系
+            primaryColor: '#ff4d4f',
+            primaryHoverColor: '#ff7875',
+            // 遮罩层 - 半透明黑色
+            overlayColor: 'rgba(0, 0, 0, 0.6)',
+            // 浅色模式 - 渐变背景
+            panelBgLight: 'linear-gradient(135deg, #fff5f5 0%, #ffe8e8 100%)',
+            // 深色模式 - 深色背景
+            panelBgDark:
+              'linear-gradient(135deg, rgba(49, 44, 0, 1.000) 0.000%, rgba(49, 44, 0, 1.000) 14.286%, rgba(51, 46, 30, 1.000) 14.286%, rgba(51, 46, 30, 1.000) 28.571%, rgba(50, 49, 73, 1.000) 28.571%, rgba(50, 49, 73, 1.000) 42.857%, rgba(44, 51, 119, 1.000) 42.857%, rgba(44, 51, 119, 1.000) 57.143%, rgba(36, 54, 162, 1.000) 57.143%, rgba(36, 54, 162, 1.000) 71.429%, rgba(26, 57, 192, 1.000) 71.429%, rgba(26, 57, 192, 1.000) 85.714%, rgba(17, 60, 204, 1.000) 85.714% 100.000%)',
+            // 浅色模式文本
+            textPrimaryLight: '#8b2635',
+            textSecondaryLight: '#c85a5a',
+            // 深色模式文本 - 暖色调
+            textPrimaryDark: '#ffe0e0',
+            textSecondaryDark: '#ff9999'
+          }
+        })
+
+        // 或者使用 setTheme 方法单独设置主题
+        // PaymentPanel.setTheme({
+        //   primaryColor: '#ff4d4f',
+        //   primaryHoverColor: '#ff7875',
+        //   panelBgLight: 'linear-gradient(135deg, #fff5f5 0%, #ffe8e8 100%)',
+        //   panelBgDark: '#1a0f0f',
+        //   textPrimaryLight: '#8b2635',
+        //   textSecondaryLight: '#c85a5a',
+        //   textPrimaryDark: '#ffe0e0',
+        //   textSecondaryDark: '#ff9999'
+        // })
+
+        PaymentPanel.on('payment-confirm', eventConfirmHandler)
+        PaymentPanel.open(299.99)
+      }
+    </script>
+  </body>
+</html>

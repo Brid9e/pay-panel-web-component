@@ -1,38 +1,11 @@
-// 支付方式接口
-interface PaymentMethod {
-  [key: string]: any // 允许任意字段
-  value: string | number // 必须有一个唯一标识
-}
+import type { PaymentMethod, FieldMapping, PaymentPanelConfig } from './types'
 
-// 字段映射配置
-interface FieldMapping {
-  titleField?: string // 标题字段名，默认 'title' 或 'name'
-  subtitleField?: string // 副标题字段名，默认 'subtitle' 或 'desc' 或 'description'
-  iconField?: string // 图标字段名，默认 'icon'
-  valueField?: string // 值字段名，默认 'value' 或 'id'
-}
-
-// 支付面板配置
-interface PaymentPanelConfig {
-  // 拖拽关闭相关
-  allowSwipeToClose?: boolean // 是否允许下拉关闭，默认 true
-  closeThreshold?: number // 关闭距离阈值（像素），默认 100px
-  closeThresholdPercent?: number // 关闭距离阈值（百分比 0-1），默认 0.3
-  velocityThreshold?: number // 速度阈值（像素/毫秒），默认 0.5
-
-  // 行为配置
-  closeOnOverlayClick?: boolean // 点击遮罩层是否关闭，默认 true
-
-  // 密码输入相关
-  enablePassword?: boolean // 是否启用密码输入，默认 false
-  passwordLength?: number // 密码位数，默认 6
-
-  // UI配置
-  headerTitle?: string // 标题文本，默认 "支付"
-}
-
-// 默认配置
-const DEFAULT_CONFIG: Required<PaymentPanelConfig> = {
+/**
+ * 默认配置
+ * 支付面板的默认配置值
+ * @author Brid9e
+ */
+const DEFAULT_CONFIG: Required<Omit<PaymentPanelConfig, 'theme'>> = {
   allowSwipeToClose: true,
   closeThreshold: 100,
   closeThresholdPercent: 0.3,
@@ -40,9 +13,15 @@ const DEFAULT_CONFIG: Required<PaymentPanelConfig> = {
   closeOnOverlayClick: true,
   enablePassword: false,
   passwordLength: 6,
-  headerTitle: '支付'
+  headerTitle: '支付',
+  amountLabel: '支付金额'
 }
 
+/**
+ * 支付面板组件
+ * 一个基于 Web Components 的移动端支付面板组件，支持拖拽关闭、密码输入、主题自定义等功能
+ * @author Brid9e
+ */
 class PaymentPanel extends HTMLElement {
   private shadow: ShadowRoot
   private isOpen: boolean = false
@@ -68,14 +47,25 @@ class PaymentPanel extends HTMLElement {
   private passwordLength: number = DEFAULT_CONFIG.passwordLength
   private currentPassword: string = '' // 当前输入的密码
   private headerTitle: string = DEFAULT_CONFIG.headerTitle
+  private amountLabel: string = DEFAULT_CONFIG.amountLabel
 
-  // 默认支付方式
+  // 主题配置
+  private theme: PaymentPanelConfig['theme'] = {}
+
+  /**
+   * 默认支付方式列表
+   * @author Brid9e
+   */
   private static readonly DEFAULT_PAYMENT_METHODS: PaymentMethod[] = [
     { value: 'wechat', title: '微信支付', subtitle: '推荐使用', icon: '💳' },
     { value: 'alipay', title: '支付宝', subtitle: '安全便捷', icon: '💰' },
     { value: 'card', title: '银行卡', subtitle: '支持各大银行', icon: '💵' }
   ]
 
+  /**
+   * 默认字段映射配置
+   * @author Brid9e
+   */
   private static readonly DEFAULT_FIELD_MAPPING: FieldMapping = {
     titleField: 'title',
     subtitleField: 'subtitle',
@@ -88,7 +78,13 @@ class PaymentPanel extends HTMLElement {
   private fieldMapping: FieldMapping = {}
   private selectedMethod: PaymentMethod | null = null
   private hasCustomPaymentMethods: boolean = false // 标记是否设置过自定义支付方式
+  private expandedGroups: Set<number> = new Set() // 展开的分组索引
 
+  /**
+   * 构造函数
+   * 初始化支付面板组件，创建 Shadow DOM 并设置默认支付方式
+   * @author Brid9e
+   */
   constructor() {
     super()
     this.shadow = this.attachShadow({ mode: 'open' })
@@ -102,11 +98,24 @@ class PaymentPanel extends HTMLElement {
     }
   }
 
-  // 静态属性观察器，用于监听属性变化
+  /**
+   * 静态属性观察器，用于监听属性变化
+   * 返回需要监听的属性名称数组
+   * @returns {string[]} 需要监听的属性名称数组
+   * @author Brid9e
+   */
   static get observedAttributes() {
     return ['close-threshold', 'close-threshold-percent', 'velocity-threshold', 'close-on-overlay-click', 'enable-password', 'password-length']
   }
 
+  /**
+   * 属性变化回调函数
+   * 当 observedAttributes 中定义的属性发生变化时触发
+   * @param {string} name - 属性名称
+   * @param {string} oldValue - 旧值
+   * @param {string} newValue - 新值
+   * @author Brid9e
+   */
   attributeChangedCallback(name: string, oldValue: string, newValue: string) {
     if (oldValue === newValue) return
 
@@ -132,6 +141,11 @@ class PaymentPanel extends HTMLElement {
     }
   }
 
+  /**
+   * 元素连接到 DOM 时调用
+   * 初始化组件，读取属性值，渲染 UI，设置事件监听器
+   * @author Brid9e
+   */
   connectedCallback() {
     // 读取属性值
     const closeThreshold = this.getAttribute('close-threshold')
@@ -159,10 +173,20 @@ class PaymentPanel extends HTMLElement {
     this.updateDragHandleVisibility()
   }
 
+  /**
+   * 元素从 DOM 断开时调用
+   * 清理事件监听器
+   * @author Brid9e
+   */
   disconnectedCallback() {
     this.removeEventListeners()
   }
 
+  /**
+   * 检测系统主题
+   * 监听系统深色/浅色模式变化，并自动更新组件主题
+   * @author Brid9e
+   */
   private detectSystemTheme() {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
     this.updateTheme(mediaQuery.matches)
@@ -173,6 +197,12 @@ class PaymentPanel extends HTMLElement {
     })
   }
 
+  /**
+   * 更新主题
+   * 根据系统主题设置组件的 data-theme 属性
+   * @param {boolean} isDark - 是否为深色模式
+   * @author Brid9e
+   */
   private updateTheme(isDark: boolean) {
     const root = this.shadow.host
     if (isDark) {
@@ -182,35 +212,56 @@ class PaymentPanel extends HTMLElement {
     }
   }
 
+  /**
+   * 渲染组件
+   * 生成组件的 HTML 结构和样式，应用主题配置
+   * @author Brid9e
+   */
   private render() {
+    // 获取主题色值，如果未设置则使用默认值
+    const primaryColor = this.theme?.primaryColor || '#238636'
+    const primaryHoverColor = this.theme?.primaryHoverColor || '#2ea043'
+    const overlayColor = this.theme?.overlayColor || 'rgba(0, 0, 0, 0.5)'
+    const panelBgLight = this.theme?.panelBgLight || '#ffffff'
+    const panelBgDark = this.theme?.panelBgDark || '#2d2d2d'
+    const textPrimaryLight = this.theme?.textPrimaryLight || '#24292f'
+    const textPrimaryDark = this.theme?.textPrimaryDark || '#e0e0e0'
+    const textSecondaryLight = this.theme?.textSecondaryLight || '#57606a'
+    const textSecondaryDark = this.theme?.textSecondaryDark || '#999999'
+
     this.shadow.innerHTML = `
       <style>
         :host {
-          --bg-overlay: rgba(0, 0, 0, 0.5);
-          --bg-panel-light: #ffffff;
-          --bg-panel-dark: #161b22;
+          --bg-overlay: ${overlayColor};
+          --bg-panel-light: ${panelBgLight};
+          --bg-panel-dark: ${panelBgDark};
           --bg-header-light: #f6f8fa;
-          --bg-header-dark: #21262d;
-          --bg-button-primary-light: #238636;
-          --bg-button-primary-dark: #238636;
-          --bg-button-primary-hover-light: #2ea043;
-          --bg-button-primary-hover-dark: #2ea043;
+          --bg-header-dark: #333333;
+          --bg-button-primary-light: ${primaryColor};
+          --bg-button-primary-dark: ${primaryColor};
+          --bg-button-primary-hover-light: ${primaryHoverColor};
+          --bg-button-primary-hover-dark: ${primaryHoverColor};
           --bg-button-secondary-light: #f6f8fa;
-          --bg-button-secondary-dark: #21262d;
+          --bg-button-secondary-dark: #333333;
           --bg-button-secondary-hover-light: #f3f4f6;
-          --bg-button-secondary-hover-dark: #30363d;
-          --text-primary-light: #24292f;
-          --text-primary-dark: #e6edf3;
-          --text-secondary-light: #57606a;
-          --text-secondary-dark: #8b949e;
+          --bg-button-secondary-hover-dark: #404040;
+          --text-primary-light: ${textPrimaryLight};
+          --text-primary-dark: ${textPrimaryDark};
+          --text-secondary-light: ${textSecondaryLight};
+          --text-secondary-dark: ${textSecondaryDark};
           --border-light: #d0d7de;
-          --border-dark: #30363d;
+          --border-dark: #4d4d4d;
           --shadow-light: rgba(0, 0, 0, 0.1);
           --shadow-dark: rgba(0, 0, 0, 0.3);
         }
 
         :host([data-theme="dark"]) {
-          --bg-overlay: rgba(0, 0, 0, 0.7);
+          --bg-overlay: ${overlayColor.includes('rgba')
+            ? overlayColor.replace(/[\d.]+(?=\))/, (match) => {
+                const opacity = parseFloat(match)
+                return String(Math.min(1, opacity + 0.2))
+              })
+            : 'rgba(0, 0, 0, 0.7)'};
         }
 
         .overlay {
@@ -236,7 +287,7 @@ class PaymentPanel extends HTMLElement {
           bottom: 0;
           left: 0;
           right: 0;
-          background-color: var(--bg-panel-light);
+          background: var(--bg-panel-light);
           border-top-left-radius: 16px;
           border-top-right-radius: 16px;
           box-shadow: 0 -4px 20px var(--shadow-light);
@@ -295,7 +346,7 @@ class PaymentPanel extends HTMLElement {
         }
 
         :host([data-theme="dark"]) .panel {
-          background-color: var(--bg-panel-dark);
+          background: var(--bg-panel-dark);
           box-shadow: 0 -4px 20px var(--shadow-dark);
         }
 
@@ -441,14 +492,87 @@ class PaymentPanel extends HTMLElement {
         .payment-method {
           display: flex;
           align-items: center;
-          padding: 12px;
+          padding: 10px 12px;
           border: 1px solid var(--border-light);
           border-radius: 8px;
-          margin-bottom: 8px;
+          margin-bottom: 6px;
           cursor: pointer;
           transition: background-color 0.2s ease, border-color 0.2s ease;
           outline: none;
           -webkit-tap-highlight-color: transparent;
+        }
+
+        .payment-method-group {
+          margin-bottom: 8px;
+        }
+
+        .payment-method-group-header {
+          display: flex;
+          align-items: center;
+          padding: 10px 12px;
+          border: 1px solid var(--border-light);
+          border-radius: 8px;
+          margin-bottom: 6px;
+          cursor: pointer;
+          transition: background-color 0.2s ease, border-color 0.2s ease;
+          outline: none;
+          -webkit-tap-highlight-color: transparent;
+          user-select: none;
+        }
+
+        :host([data-theme="dark"]) .payment-method-group-header {
+          border-color: var(--border-dark);
+        }
+
+        .payment-method-group-header:hover {
+          background-color: var(--bg-button-secondary-hover-light);
+        }
+
+        :host([data-theme="dark"]) .payment-method-group-header:hover {
+          background-color: var(--bg-button-secondary-hover-dark);
+        }
+
+        .payment-method-group-header .payment-name {
+          font-weight: 600;
+        }
+
+        .payment-method-group-children {
+          padding-left: 12px;
+          max-height: 0;
+          overflow: hidden;
+          transition: max-height 0.3s ease;
+        }
+
+        .payment-method-group.expanded .payment-method-group-children {
+          max-height: 2000px;
+        }
+
+        .payment-method-group-arrow {
+          width: 20px;
+          height: 20px;
+          margin-left: auto;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: transform 0.3s ease;
+        }
+
+        .payment-method-group.expanded .payment-method-group-arrow {
+          transform: rotate(90deg);
+        }
+
+        .payment-method-group-arrow svg {
+          width: 16px;
+          height: 16px;
+        }
+
+        .payment-method-group-arrow svg path {
+          stroke: var(--text-secondary-light);
+          stroke-width: 2;
+        }
+
+        :host([data-theme="dark"]) .payment-method-group-arrow svg path {
+          stroke: var(--text-secondary-dark);
         }
 
         .payment-method:active {
@@ -482,13 +606,13 @@ class PaymentPanel extends HTMLElement {
         }
 
         .payment-icon {
-          width: 32px;
-          height: 32px;
-          margin-right: 12px;
+          width: 28px;
+          height: 28px;
+          margin-right: 10px;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 20px;
+          font-size: 18px;
         }
 
         .payment-info {
@@ -496,7 +620,7 @@ class PaymentPanel extends HTMLElement {
         }
 
         .payment-name {
-          font-size: 16px;
+          font-size: 14px;
           font-weight: 500;
           color: var(--text-primary-light);
           margin-bottom: 2px;
@@ -507,7 +631,7 @@ class PaymentPanel extends HTMLElement {
         }
 
         .payment-desc {
-          font-size: 12px;
+          font-size: 11px;
           color: var(--text-secondary-light);
         }
 
@@ -516,8 +640,8 @@ class PaymentPanel extends HTMLElement {
         }
 
         .payment-radio {
-          width: 24px;
-          height: 24px;
+          width: 20px;
+          height: 20px;
           position: relative;
           flex-shrink: 0;
           display: flex;
@@ -532,12 +656,12 @@ class PaymentPanel extends HTMLElement {
         }
 
         .payment-radio svg {
-          width: 24px;
-          height: 24px;
+          width: 20px;
+          height: 20px;
         }
 
         .payment-radio svg path {
-          stroke: #238636;
+          stroke: ${primaryColor};
           stroke-width: 2.5;
           stroke-linecap: round;
           stroke-linejoin: round;
@@ -546,15 +670,9 @@ class PaymentPanel extends HTMLElement {
 
         .actions {
           padding: 16px 20px;
-          border-top: 1px solid var(--border-light);
-          background-color: var(--bg-header-light);
+          background: transparent;
           display: flex;
           gap: 12px;
-        }
-
-        :host([data-theme="dark"]) .actions {
-          border-top-color: var(--border-dark);
-          background-color: var(--bg-header-dark);
         }
 
         .btn {
@@ -566,6 +684,9 @@ class PaymentPanel extends HTMLElement {
           font-weight: 500;
           cursor: pointer;
           transition: background-color 0.2s ease;
+          outline: none;
+          -webkit-tap-highlight-color: transparent;
+          user-select: none;
         }
 
         .btn-secondary {
@@ -593,6 +714,15 @@ class PaymentPanel extends HTMLElement {
 
         .btn-primary:hover {
           background-color: var(--bg-button-primary-hover-light);
+        }
+
+        :host([data-theme="dark"]) .btn-primary {
+          background-color: var(--bg-button-primary-dark);
+          color: #ffffff;
+        }
+
+        :host([data-theme="dark"]) .btn-primary:hover {
+          background-color: var(--bg-button-primary-hover-dark);
         }
 
         .password-section {
@@ -744,7 +874,7 @@ class PaymentPanel extends HTMLElement {
         </div>
         <div class="content">
           <div class="amount-section">
-            <div class="amount-label">支付金额</div>
+            <div class="amount-label">${this.amountLabel}</div>
             <div class="amount-value"><span class="currency-symbol">¥</span><span id="amount">0.00</span></div>
           </div>
           <div class="payment-methods">
@@ -801,11 +931,21 @@ class PaymentPanel extends HTMLElement {
     this.renderPaymentMethods()
   }
 
+  /**
+   * 初始化密码输入
+   * 渲染密码点并设置键盘事件监听器
+   * @author Brid9e
+   */
   private initPasswordInput() {
     this.renderPasswordDots()
     this.setupKeyboardListeners()
   }
 
+  /**
+   * 渲染密码点
+   * 根据当前密码长度渲染对应数量的密码点
+   * @author Brid9e
+   */
   private renderPasswordDots() {
     const container = this.shadow.querySelector('#passwordDots')
     if (!container) return
@@ -821,6 +961,11 @@ class PaymentPanel extends HTMLElement {
     }
   }
 
+  /**
+   * 设置键盘事件监听器
+   * 为数字键和删除键添加点击事件处理
+   * @author Brid9e
+   */
   private setupKeyboardListeners() {
     const keyboard = this.shadow.querySelector('#keyboard')
     if (!keyboard) return
@@ -850,6 +995,11 @@ class PaymentPanel extends HTMLElement {
     }
   }
 
+  /**
+   * 检查密码是否输入完成
+   * 当密码长度达到设定值时，触发支付确认事件并关闭面板
+   * @author Brid9e
+   */
   private checkPasswordComplete() {
     if (this.currentPassword.length === this.passwordLength) {
       // 密码输入完成，触发支付确认
@@ -882,6 +1032,11 @@ class PaymentPanel extends HTMLElement {
     }
   }
 
+  /**
+   * 更新密码输入 UI
+   * 根据是否启用密码输入来显示/隐藏密码输入区域和操作按钮
+   * @author Brid9e
+   */
   private updatePasswordUI() {
     const passwordSection = this.shadow.querySelector('#passwordSection') as HTMLElement
     const actions = this.shadow.querySelector('#actions') as HTMLElement
@@ -903,6 +1058,11 @@ class PaymentPanel extends HTMLElement {
     }
   }
 
+  /**
+   * 渲染支付方式列表
+   * 支持普通列表和二级分组列表，处理展开/折叠功能
+   * @author Brid9e
+   */
   private renderPaymentMethods() {
     const container = this.shadow.querySelector('#payment-methods-list')
     if (!container) return
@@ -921,32 +1081,120 @@ class PaymentPanel extends HTMLElement {
       return ''
     }
 
-    container.innerHTML = this.paymentMethods
-      .map((method, index) => {
-        const value = String(getField(method, valueField, ['value', 'id', 'code']) || index)
-        const title = String(getField(method, titleField, ['title', 'name', 'label']) || '')
-        const subtitle = String(getField(method, subtitleField, ['subtitle', 'desc', 'description']) || '')
-        const icon = String(getField(method, iconField, ['icon', 'emoji']) || '💳')
-        const isSelected = this.selectedMethod === method || (index === 0 && !this.selectedMethod)
+    // 扁平化所有支付方式（包括子项）用于查找选中项
+    const flattenMethods = (methods: PaymentMethod[]): PaymentMethod[] => {
+      const result: PaymentMethod[] = []
+      methods.forEach(method => {
+        if (method.children && method.children.length > 0) {
+          result.push(...flattenMethods(method.children))
+        } else {
+          result.push(method)
+        }
+      })
+      return result
+    }
 
-        return `
-          <div class="payment-method ${isSelected ? 'selected' : ''}" data-method="${value}" data-index="${index}">
-            <div class="payment-icon">${icon}</div>
-            <div class="payment-info">
-              <div class="payment-name">${title}</div>
-              ${subtitle ? `<div class="payment-desc">${subtitle}</div>` : ''}
+    const allMethods = flattenMethods(this.paymentMethods)
+    let itemIndex = 0
+
+    container.innerHTML = this.paymentMethods
+      .map((method, groupIndex) => {
+        // 检查是否有 children
+        if (method.children && method.children.length > 0) {
+          // 分组模式
+          const title = String(getField(method, titleField, ['title', 'name', 'label']) || '')
+          const isExpanded = this.expandedGroups.has(groupIndex)
+
+          const childrenHtml = method.children
+            .map((child: PaymentMethod) => {
+              const value = String(getField(child, valueField, ['value', 'id', 'code']) || itemIndex)
+              const childTitle = String(getField(child, titleField, ['title', 'name', 'label']) || '')
+              const childSubtitle = String(getField(child, subtitleField, ['subtitle', 'desc', 'description']) || '')
+              const icon = String(getField(child, iconField, ['icon', 'emoji']) || '💳')
+              const isSelected = this.selectedMethod === child
+              const currentIndex = itemIndex++
+
+              return `
+                <div class="payment-method ${isSelected ? 'selected' : ''}" data-method="${value}" data-index="${currentIndex}" data-group-index="${groupIndex}">
+                  <div class="payment-icon">${icon}</div>
+                  <div class="payment-info">
+                    <div class="payment-name">${childTitle}</div>
+                    ${childSubtitle ? `<div class="payment-desc">${childSubtitle}</div>` : ''}
+                  </div>
+                  <div class="payment-radio">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M20 6L9 17l-5-5"/>
+                    </svg>
+                  </div>
+                </div>
+              `
+            })
+            .join('')
+
+          return `
+            <div class="payment-method-group ${isExpanded ? 'expanded' : ''}" data-group-index="${groupIndex}">
+              <div class="payment-method-group-header" data-group-header="${groupIndex}">
+                <div class="payment-info">
+                  <div class="payment-name">${title}</div>
+                </div>
+                <div class="payment-method-group-arrow">
+                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M9 18l6-6-6-6"/>
+                  </svg>
+                </div>
+              </div>
+              <div class="payment-method-group-children">
+                ${childrenHtml}
+              </div>
             </div>
-            <div class="payment-radio">
-              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M20 6L9 17l-5-5"/>
-              </svg>
+          `
+        } else {
+          // 普通模式
+          const value = String(getField(method, valueField, ['value', 'id', 'code']) || itemIndex)
+          const title = String(getField(method, titleField, ['title', 'name', 'label']) || '')
+          const subtitle = String(getField(method, subtitleField, ['subtitle', 'desc', 'description']) || '')
+          const icon = String(getField(method, iconField, ['icon', 'emoji']) || '💳')
+          const isSelected = this.selectedMethod === method || (itemIndex === 0 && !this.selectedMethod)
+          const currentIndex = itemIndex++
+
+          return `
+            <div class="payment-method ${isSelected ? 'selected' : ''}" data-method="${value}" data-index="${currentIndex}">
+              <div class="payment-icon">${icon}</div>
+              <div class="payment-info">
+                <div class="payment-name">${title}</div>
+                ${subtitle ? `<div class="payment-desc">${subtitle}</div>` : ''}
+              </div>
+              <div class="payment-radio">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M20 6L9 17l-5-5"/>
+                </svg>
+              </div>
             </div>
-          </div>
-        `
+          `
+        }
       })
       .join('')
+
+    // 设置分组展开/折叠事件
+    container.querySelectorAll('.payment-method-group-header').forEach(header => {
+      header.addEventListener('click', (e) => {
+        e.stopPropagation()
+        const groupIndex = parseInt(header.getAttribute('data-group-header') || '0')
+        if (this.expandedGroups.has(groupIndex)) {
+          this.expandedGroups.delete(groupIndex)
+        } else {
+          this.expandedGroups.add(groupIndex)
+        }
+        this.renderPaymentMethods()
+      })
+    })
   }
 
+  /**
+   * 设置事件监听器
+   * 为遮罩层、关闭按钮、确认/取消按钮、支付方式选择等添加事件处理
+   * @author Brid9e
+   */
   private setupEventListeners() {
     // 遮罩层点击关闭（根据配置决定是否添加）
     if (this.overlay && this.closeOnOverlayClick) {
@@ -1015,12 +1263,21 @@ class PaymentPanel extends HTMLElement {
     if (this.panel) {
       this.panel.addEventListener('click', (e) => {
         const target = (e.target as HTMLElement).closest('.payment-method')
-        if (target) {
+        if (target && !target.closest('.payment-method-group-header')) {
+          e.stopPropagation()
           const index = parseInt(target.getAttribute('data-index') || '0')
-          this.selectedMethod = this.paymentMethods[index]
-          const paymentMethods = this.shadow.querySelectorAll('.payment-method')
-          paymentMethods.forEach((m) => m.classList.remove('selected'))
-          target.classList.add('selected')
+          const allMethods = this.getAllMethods()
+          if (allMethods[index]) {
+            // 如果切换了支付方式，清空已输入的密码
+            if (this.selectedMethod !== allMethods[index] && this.currentPassword.length > 0) {
+              this.currentPassword = ''
+              this.renderPasswordDots()
+            }
+            this.selectedMethod = allMethods[index]
+            const paymentMethods = this.shadow.querySelectorAll('.payment-method')
+            paymentMethods.forEach((m) => m.classList.remove('selected'))
+            target.classList.add('selected')
+          }
         }
       })
     }
@@ -1036,6 +1293,11 @@ class PaymentPanel extends HTMLElement {
     this.setupDragListeners()
   }
 
+  /**
+   * 设置拖拽事件监听器
+   * 为面板、拖拽手柄、头部等添加触摸和鼠标拖拽事件
+   * @author Brid9e
+   */
   private setupDragListeners() {
     if (!this.panel || !this.allowSwipeToClose) return
 
@@ -1069,6 +1331,12 @@ class PaymentPanel extends HTMLElement {
     document.addEventListener('mouseup', this.handleDragEnd.bind(this))
   }
 
+  /**
+   * 处理拖拽开始
+   * 记录拖拽起始位置和时间，初始化拖拽状态
+   * @param {TouchEvent | MouseEvent} e - 触摸或鼠标事件
+   * @author Brid9e
+   */
   private handleDragStart(e: TouchEvent | MouseEvent) {
     if (!this.isOpen || !this.panel || !this.allowSwipeToClose) return
 
@@ -1108,6 +1376,12 @@ class PaymentPanel extends HTMLElement {
     }
   }
 
+  /**
+   * 处理拖拽移动
+   * 更新面板位置，计算拖拽速度，更新遮罩层透明度
+   * @param {TouchEvent | MouseEvent} e - 触摸或鼠标事件
+   * @author Brid9e
+   */
   private handleDragMove(e: TouchEvent | MouseEvent) {
     if (!this.isDragging || !this.panel) return
 
@@ -1143,6 +1417,12 @@ class PaymentPanel extends HTMLElement {
     }
   }
 
+  /**
+   * 处理拖拽结束
+   * 根据拖拽距离和速度判断是否关闭面板，或回弹到原位置
+   * @param {TouchEvent | MouseEvent} e - 触摸或鼠标事件
+   * @author Brid9e
+   */
   private handleDragEnd(e: TouchEvent | MouseEvent) {
     if (!this.isDragging || !this.panel) return
 
@@ -1192,6 +1472,13 @@ class PaymentPanel extends HTMLElement {
     this.velocity = 0
   }
 
+  /**
+   * 获取事件的 Y 坐标
+   * 兼容触摸事件和鼠标事件
+   * @param {TouchEvent | MouseEvent} e - 触摸或鼠标事件
+   * @returns {number} Y 坐标值
+   * @author Brid9e
+   */
   private getY(e: TouchEvent | MouseEvent): number {
     if ('touches' in e && e.touches.length > 0) {
       return e.touches[0].clientY
@@ -1201,10 +1488,21 @@ class PaymentPanel extends HTMLElement {
     return 0
   }
 
+  /**
+   * 移除事件监听器
+   * 清理所有事件监听器（当前为空实现，保留接口）
+   * @author Brid9e
+   */
   private removeEventListeners() {
     // 清理事件监听器
   }
 
+  /**
+   * 打开支付面板
+   * 显示支付面板，可选择性设置支付金额
+   * @param {number} [amount] - 支付金额，可选
+   * @author Brid9e
+   */
   public open(amount?: number) {
     if (this.isOpen) return
 
@@ -1242,6 +1540,11 @@ class PaymentPanel extends HTMLElement {
     })
   }
 
+  /**
+   * 关闭支付面板
+   * 隐藏支付面板，恢复页面滚动，触发关闭事件
+   * @author Brid9e
+   */
   public close() {
     if (!this.isOpen) return
 
@@ -1268,6 +1571,12 @@ class PaymentPanel extends HTMLElement {
     )
   }
 
+  /**
+   * 设置支付金额
+   * 更新面板中显示的支付金额
+   * @param {number} amount - 支付金额
+   * @author Brid9e
+   */
   public setAmount(amount: number) {
     const amountElement = this.shadow.querySelector('#amount')
     if (amountElement) {
@@ -1275,13 +1584,23 @@ class PaymentPanel extends HTMLElement {
     }
   }
 
-  // 设置关闭阈值（像素）
+  /**
+   * 设置关闭阈值（像素）
+   * 设置拖拽关闭面板所需的最小像素距离
+   * @param {number} threshold - 关闭阈值（像素）
+   * @author Brid9e
+   */
   public setCloseThreshold(threshold: number) {
     this.closeThreshold = threshold
     this.setAttribute('close-threshold', String(threshold))
   }
 
-  // 设置关闭阈值（百分比，0-1之间）
+  /**
+   * 设置关闭阈值（百分比）
+   * 设置拖拽关闭面板所需的最小百分比距离（相对于面板高度）
+   * @param {number} percent - 关闭阈值（0-1之间）
+   * @author Brid9e
+   */
   public setCloseThresholdPercent(percent: number) {
     this.closeThresholdPercent = Math.max(0, Math.min(1, percent))
     this.setAttribute(
@@ -1290,13 +1609,24 @@ class PaymentPanel extends HTMLElement {
     )
   }
 
-  // 设置速度阈值（像素/毫秒）
+  /**
+   * 设置速度阈值（像素/毫秒）
+   * 设置拖拽关闭面板所需的最小速度
+   * @param {number} threshold - 速度阈值（像素/毫秒）
+   * @author Brid9e
+   */
   public setVelocityThreshold(threshold: number) {
     this.velocityThreshold = threshold
     this.setAttribute('velocity-threshold', String(threshold))
   }
 
-  // 设置支付方式列表
+  /**
+   * 设置支付方式列表
+   * 设置自定义支付方式列表和字段映射配置，支持二级分组结构
+   * @param {PaymentMethod[]} [methods] - 支付方式列表，如果为空则使用默认列表
+   * @param {FieldMapping} [fieldMapping] - 字段映射配置，用于自定义字段名
+   * @author Brid9e
+   */
   public setPaymentMethods(methods?: PaymentMethod[], fieldMapping?: FieldMapping) {
     // 如果没有传入或传入空数组，恢复为默认值
     if (!methods || methods.length === 0) {
@@ -1318,12 +1648,40 @@ class PaymentPanel extends HTMLElement {
     }
   }
 
-  // 获取当前选中的支付方式
+  /**
+   * 获取当前选中的支付方式
+   * 返回当前用户选中的支付方式对象
+   * @returns {PaymentMethod | null} 当前选中的支付方式，如果未选中则返回 null
+   * @author Brid9e
+   */
   public getSelectedMethod(): PaymentMethod | null {
     return this.selectedMethod
   }
 
-  // 设置点击遮罩层是否关闭
+  /**
+   * 获取所有支付方式（扁平化，包括子项）
+   * 将分组结构扁平化，返回所有可选的支付方式
+   * @returns {PaymentMethod[]} 扁平化后的支付方式列表
+   * @author Brid9e
+   */
+  private getAllMethods(): PaymentMethod[] {
+    const result: PaymentMethod[] = []
+    this.paymentMethods.forEach(method => {
+      if (method.children && method.children.length > 0) {
+        result.push(...method.children)
+      } else {
+        result.push(method)
+      }
+    })
+    return result
+  }
+
+  /**
+   * 设置点击遮罩层是否关闭
+   * 控制点击遮罩层时是否关闭支付面板
+   * @param {boolean} close - 是否允许点击遮罩层关闭
+   * @author Brid9e
+   */
   public setCloseOnOverlayClick(close: boolean) {
     this.closeOnOverlayClick = close
     this.setAttribute('close-on-overlay-click', String(close))
@@ -1345,7 +1703,12 @@ class PaymentPanel extends HTMLElement {
     }
   }
 
-  // 设置是否启用密码输入
+  /**
+   * 设置是否启用密码输入
+   * 控制是否显示密码输入界面
+   * @param {boolean} enable - 是否启用密码输入
+   * @author Brid9e
+   */
   public setEnablePassword(enable: boolean) {
     this.enablePassword = enable
     this.setAttribute('enable-password', String(enable))
@@ -1356,7 +1719,12 @@ class PaymentPanel extends HTMLElement {
     }
   }
 
-  // 设置密码位数
+  /**
+   * 设置密码位数
+   * 设置支付密码的位数，范围限制在 4-12 位
+   * @param {number} length - 密码位数（4-12）
+   * @author Brid9e
+   */
   public setPasswordLength(length: number) {
     this.passwordLength = Math.max(4, Math.min(12, length)) // 限制在4-12位
     this.setAttribute('password-length', String(this.passwordLength))
@@ -1364,7 +1732,12 @@ class PaymentPanel extends HTMLElement {
     this.renderPasswordDots()
   }
 
-  // 统一配置方法
+  /**
+   * 统一配置方法
+   * 一次性设置所有配置项，包括拖拽、行为、密码、UI、主题等配置
+   * @param {PaymentPanelConfig} config - 配置对象
+   * @author Brid9e
+   */
   public setConfig(config: PaymentPanelConfig) {
     // 如果配置项存在，使用传入的值；如果不存在，恢复为默认值
     this.allowSwipeToClose = config.allowSwipeToClose !== undefined
@@ -1430,16 +1803,38 @@ class PaymentPanel extends HTMLElement {
       ? (config.headerTitle || DEFAULT_CONFIG.headerTitle)
       : DEFAULT_CONFIG.headerTitle
     this.updateHeaderTitle()
+
+    this.amountLabel = config.amountLabel !== undefined
+      ? (config.amountLabel || DEFAULT_CONFIG.amountLabel)
+      : DEFAULT_CONFIG.amountLabel
+    this.updateAmountLabel()
+
+    // 设置主题
+    if (config.theme !== undefined) {
+      // setTheme 方法会自动处理空对象，重置为默认值
+      this.setTheme(config.theme)
+    } else {
+      // 如果没有传入 theme，重置为默认主题，避免之前设置的主题影响
+      this.setTheme({})
+    }
   }
 
-  // 重置为默认配置
+  /**
+   * 重置为默认配置
+   * 将所有配置项重置为默认值
+   * @author Brid9e
+   */
   public resetConfig() {
     this.setConfig({})
     // 重置支付方式为默认值（setPaymentMethods 会自动设置 hasCustomPaymentMethods = false）
     this.setPaymentMethods()
   }
 
-  // 更新拖动滑块显示状态
+  /**
+   * 更新拖动滑块显示状态
+   * 根据是否允许下拉关闭来控制拖动滑块的显示/隐藏
+   * @author Brid9e
+   */
   private updateDragHandleVisibility() {
     const dragHandle = this.shadow.querySelector('.drag-handle') as HTMLElement
     if (dragHandle) {
@@ -1451,18 +1846,88 @@ class PaymentPanel extends HTMLElement {
     }
   }
 
-  // 设置标题
+  /**
+   * 设置标题
+   * 设置支付面板的标题文本
+   * @param {string} title - 标题文本
+   * @author Brid9e
+   */
   public setHeaderTitle(title: string) {
     this.headerTitle = title || '支付'
     this.updateHeaderTitle()
   }
 
-  // 更新标题显示
+  /**
+   * 更新标题显示
+   * 更新 DOM 中标题元素的文本内容
+   * @author Brid9e
+   */
   private updateHeaderTitle() {
     const titleElement = this.shadow.querySelector('#headerTitle') as HTMLElement
     if (titleElement) {
       titleElement.textContent = this.headerTitle
     }
+  }
+
+  /**
+   * 设置金额标签
+   * 设置支付金额标签的文本
+   * @param {string} label - 金额标签文本
+   * @author Brid9e
+   */
+  public setAmountLabel(label: string) {
+    this.amountLabel = label || '支付金额'
+    this.updateAmountLabel()
+  }
+
+  /**
+   * 更新金额标签显示
+   * 更新 DOM 中金额标签元素的文本内容
+   * @author Brid9e
+   */
+  private updateAmountLabel() {
+    const labelElement = this.shadow.querySelector('.amount-label') as HTMLElement
+    if (labelElement) {
+      labelElement.textContent = this.amountLabel
+    }
+  }
+
+  /**
+   * 设置主题
+   * 设置支付面板的主题配色，包括主色调、背景色、文本色等
+   * @param {PaymentPanelConfig['theme']} theme - 主题配置对象，传入空对象会重置为默认主题
+   * @author Brid9e
+   */
+  public setTheme(theme: PaymentPanelConfig['theme']) {
+    // 如果传入空对象或 null/undefined，重置为主题默认值（空对象）
+    // 这样在 render 时会使用默认值
+    if (!theme || Object.keys(theme).length === 0) {
+      this.theme = {}
+    } else {
+      this.theme = theme
+    }
+    // 重新渲染以应用新主题
+    this.render()
+    // 重新设置事件监听器
+    this.setupEventListeners()
+    // 重新初始化密码输入
+    this.initPasswordInput()
+    this.updatePasswordUI()
+    this.updateDragHandleVisibility()
+    // 重新渲染支付方式列表
+    this.renderPaymentMethods()
+    // 更新标题
+    this.updateHeaderTitle()
+  }
+
+  /**
+   * 获取当前主题
+   * 返回当前设置的主题配置对象
+   * @returns {PaymentPanelConfig['theme']} 当前主题配置对象
+   * @author Brid9e
+   */
+  public getTheme(): PaymentPanelConfig['theme'] {
+    return { ...this.theme }
   }
 }
 
@@ -1471,7 +1936,7 @@ if (!customElements.get('payment-panel')) {
   customElements.define('payment-panel', PaymentPanel)
 }
 
-// 导出类型
-export type { PaymentMethod, FieldMapping, PaymentPanelConfig }
+// 导出类型（从 types 文件夹重新导出）
+export type { PaymentMethod, FieldMapping, PaymentPanelConfig } from './types'
 
 export default PaymentPanel
