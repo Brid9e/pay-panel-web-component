@@ -189,7 +189,49 @@ pypjs.on('payment-close', () => {
 pypjs.off('payment-confirm', handler)
 ```
 
-## API
+## Features
+
+### Icon Display
+
+Icon display modes: `always` (default), `never`, `auto`. Supports image URL, string (emoji/character), or default SVG icon.
+
+### Internationalization (i18n)
+
+Supports Chinese (zh), English (en), Japanese (ja), and Russian (ru). You can partially override default texts using the `i18n` configuration.
+
+```javascript
+pypjs.setConfig({
+  language: 'zh',
+  i18n: {
+    headerTitle: 'Custom Title',
+    confirmButton: 'Confirm Payment'
+  }
+})
+```
+
+### Amount Alignment and Fonts
+
+Supports custom amount alignment (`left` | `center` | `right`) and fonts for amount and text elements.
+
+### Payment Methods Control
+
+- `allowConfirmWithoutMethods`: Control whether to allow confirmation when no payment methods (default `true`)
+- `hidePaymentMethods`: Hide payment methods section, only show amount and confirm button/password input (default `false`)
+
+### Theme
+
+Automatically detects system theme settings. Supports light and dark themes with customizable colors. Backgrounds support gradients.
+
+```javascript
+pypjs.setTheme({
+  primaryColor: '#ff4d4f',
+  primaryHoverColor: '#ff7875',
+  panelBgLight: 'linear-gradient(135deg, #fff5f5 0%, #ffe8e8 100%)',
+  panelBgDark: '#1a0f0f'
+})
+```
+
+## API Reference
 
 ### Global Methods
 
@@ -290,46 +332,6 @@ pypjs.off('payment-confirm', handler)
   - `amount`: Payment amount
   - `password`: Password (if password input is enabled)
 - `payment-close` - Triggered when payment panel is closed
-
-## Icon Display
-
-Icon display modes: `always` (default), `never`, `auto`. Supports image URL, string (emoji/character), or default SVG icon.
-
-## Internationalization (i18n)
-
-Supports Chinese (zh), English (en), Japanese (ja), and Russian (ru). You can partially override default texts using the `i18n` configuration.
-
-```javascript
-pypjs.setConfig({
-  language: 'zh',
-  i18n: {
-    headerTitle: 'Custom Title',
-    confirmButton: 'Confirm Payment'
-  }
-})
-```
-
-## Amount Alignment and Fonts
-
-Supports custom amount alignment (`left` | `center` | `right`) and fonts for amount and text elements.
-
-## Payment Methods Control
-
-- `allowConfirmWithoutMethods`: Control whether to allow confirmation when no payment methods (default `true`)
-- `hidePaymentMethods`: Hide payment methods section, only show amount and confirm button/password input (default `false`)
-
-## Theme
-
-Automatically detects system theme settings. Supports light and dark themes with customizable colors. Backgrounds support gradients.
-
-```javascript
-pypjs.setTheme({
-  primaryColor: '#ff4d4f',
-  primaryHoverColor: '#ff7875',
-  panelBgLight: 'linear-gradient(135deg, #fff5f5 0%, #ffe8e8 100%)',
-  panelBgDark: '#1a0f0f'
-})
-```
 
 ## Browser Support
 

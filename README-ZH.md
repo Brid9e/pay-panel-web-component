@@ -185,7 +185,49 @@ pypjs.on('payment-close', () => {
 pypjs.off('payment-confirm', handler);
 ```
 
-## API
+## 特性
+
+### 图标显示
+
+图标显示模式：`always`（默认）、`never`、`auto`。支持图片URL、字符串（emoji/字符）或默认SVG图标。
+
+### 多语言支持
+
+支持中文（zh）、英文（en）、日文（ja）、俄文（ru）。可通过 `i18n` 配置部分覆盖默认文本。
+
+```javascript
+pypjs.setConfig({
+  language: 'zh',
+  i18n: {
+    headerTitle: '自定义标题',
+    confirmButton: '确认支付'
+  }
+});
+```
+
+### 金额对齐和字体
+
+支持自定义金额对齐方式（`left` | `center` | `right`）和金额、文本字体。
+
+### 支付方式控制
+
+- `allowConfirmWithoutMethods`：控制无支付方式时是否允许确认（默认 `true`）
+- `hidePaymentMethods`：隐藏支付方式区域，只显示金额和确认按钮/密码输入（默认 `false`）
+
+### 主题
+
+自动检测系统主题设置，支持亮色和暗色主题，可自定义颜色。背景支持渐变。
+
+```javascript
+pypjs.setTheme({
+  primaryColor: '#ff4d4f',
+  primaryHoverColor: '#ff7875',
+  panelBgLight: 'linear-gradient(135deg, #fff5f5 0%, #ffe8e8 100%)',
+  panelBgDark: '#1a0f0f'
+});
+```
+
+## API 参考
 
 ### 全局方法
 
@@ -285,46 +327,6 @@ pypjs.off('payment-confirm', handler);
   - `amount`: 支付金额
   - `password`: 密码（如果启用了密码输入）
 - `payment-close` - 支付面板关闭时触发
-
-## 图标显示
-
-图标显示模式：`always`（默认）、`never`、`auto`。支持图片URL、字符串（emoji/字符）或默认SVG图标。
-
-## 多语言支持
-
-支持中文（zh）、英文（en）、日文（ja）、俄文（ru）。可通过 `i18n` 配置部分覆盖默认文本。
-
-```javascript
-pypjs.setConfig({
-  language: 'zh',
-  i18n: {
-    headerTitle: '自定义标题',
-    confirmButton: '确认支付'
-  }
-});
-```
-
-## 金额对齐和字体
-
-支持自定义金额对齐方式（`left` | `center` | `right`）和金额、文本字体。
-
-## 支付方式控制
-
-- `allowConfirmWithoutMethods`：控制无支付方式时是否允许确认（默认 `true`）
-- `hidePaymentMethods`：隐藏支付方式区域，只显示金额和确认按钮/密码输入（默认 `false`）
-
-## 主题
-
-自动检测系统主题设置，支持亮色和暗色主题，可自定义颜色。背景支持渐变。
-
-```javascript
-pypjs.setTheme({
-  primaryColor: '#ff4d4f',
-  primaryHoverColor: '#ff7875',
-  panelBgLight: 'linear-gradient(135deg, #fff5f5 0%, #ffe8e8 100%)',
-  panelBgDark: '#1a0f0f'
-});
-```
 
 ## 浏览器支持
 
