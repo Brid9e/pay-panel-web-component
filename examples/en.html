@@ -345,6 +345,20 @@
     <script src="../dist/index.js"></script>
 
     <script>
+      // Common payment methods list for reuse
+      const commonPaymentMethods = [
+        { id: 1, name: 'WeChat Pay', desc: 'Recommended', icon: '💳' },
+        { id: 2, name: 'Alipay', desc: 'Secure & Convenient', icon: '💰' },
+        { id: 3, name: 'Apple Pay', desc: 'Fast Payment', icon: '🍎' }
+      ]
+
+      const commonPaymentMethodsFieldMapping = {
+        titleField: 'name',
+        subtitleField: 'desc',
+        iconField: 'icon',
+        valueField: 'id'
+      }
+
       // Event handlers
       const eventConfirmHandler = (e) => {
         pypjs.close()
@@ -373,6 +387,8 @@
           enablePassword: false
         })
 
+        pypjs.setPaymentMethods(commonPaymentMethods, commonPaymentMethodsFieldMapping)
+
         pypjs.on('payment-confirm', eventConfirmHandler)
         pypjs.on('payment-close', eventCloseHandler)
 
@@ -390,6 +406,8 @@
           closeThresholdPercent: 0.4,
           velocityThreshold: 0.8
         })
+
+        pypjs.setPaymentMethods(commonPaymentMethods, commonPaymentMethodsFieldMapping)
 
         pypjs.on('payment-confirm', eventConfirmHandler)
         pypjs.open(199.99)
@@ -613,6 +631,9 @@
             textSecondaryDark: '#ff9999'
           }
         })
+
+        pypjs.setPaymentMethods(commonPaymentMethods, commonPaymentMethodsFieldMapping)
+
         pypjs.on('payment-confirm', eventConfirmHandler)
         pypjs.open(299.99)
       }
@@ -621,6 +642,8 @@
         pypjs.setConfig({
           headerTitle: '❤❤❤❤ Love Payment ❤❤❤❤'
         })
+
+        pypjs.setPaymentMethods(commonPaymentMethods, commonPaymentMethodsFieldMapping)
 
         pypjs.on('payment-confirm', eventConfirmHandler)
         pypjs.open(88.88)
@@ -659,6 +682,9 @@
           enablePassword: enablePassword || false
         })
 
+        // Set payment methods even when hidden, to demonstrate the feature
+        pypjs.setPaymentMethods(commonPaymentMethods, commonPaymentMethodsFieldMapping)
+
         pypjs.on('payment-confirm', eventConfirmHandler)
         pypjs.open(299.99)
       }
@@ -668,6 +694,8 @@
         pypjs.setConfig({
           amountAlign: align
         })
+
+        pypjs.setPaymentMethods(commonPaymentMethods, commonPaymentMethodsFieldMapping)
 
         pypjs.on('payment-confirm', eventConfirmHandler)
         pypjs.open(199.99)
@@ -681,6 +709,8 @@
           textFont: 'Verdana, sans-serif'
         })
 
+        pypjs.setPaymentMethods(commonPaymentMethods, commonPaymentMethodsFieldMapping)
+
         pypjs.on('payment-confirm', eventConfirmHandler)
         pypjs.open(299.99)
       }
@@ -690,6 +720,8 @@
         pypjs.setConfig({
           language: lang
         })
+
+        pypjs.setPaymentMethods(commonPaymentMethods, commonPaymentMethodsFieldMapping)
 
         pypjs.on('payment-confirm', eventConfirmHandler)
         pypjs.open(199.99)
@@ -706,6 +738,8 @@
             // Other texts will use English defaults
           }
         })
+
+        pypjs.setPaymentMethods(commonPaymentMethods, commonPaymentMethodsFieldMapping)
 
         pypjs.on('payment-confirm', eventConfirmHandler)
         pypjs.open(299.99)
