@@ -255,7 +255,7 @@ const PaymentPanelAPI = {
 
 // 挂载到全局
 if (typeof window !== 'undefined') {
-  (window as any).PaymentPanel = PaymentPanelAPI
+  (window as any).pypjs = PaymentPanelAPI
 }
 
 // 导出

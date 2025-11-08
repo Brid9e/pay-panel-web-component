@@ -194,12 +194,12 @@
 
       // always 模式：总是显示图标
       function openPanelWithAlwaysMode() {
-        PaymentPanel.setConfig({
+        pypjs.setConfig({
           iconDisplay: 'always',
           headerTitle: '支付方式'
         })
 
-        PaymentPanel.setPaymentMethods([
+        pypjs.setPaymentMethods([
           {
             value: 'wechat',
             title: '微信支付',
@@ -220,18 +220,18 @@
           }
         ])
 
-        PaymentPanel.on('payment-confirm', eventConfirmHandler)
-        PaymentPanel.open(199.99)
+        pypjs.on('payment-confirm', eventConfirmHandler)
+        pypjs.open(199.99)
       }
 
       // auto 模式：有icon时显示
       function openPanelWithAutoMode() {
-        PaymentPanel.setConfig({
+        pypjs.setConfig({
           iconDisplay: 'auto',
           headerTitle: '支付方式'
         })
 
-        PaymentPanel.setPaymentMethods([
+        pypjs.setPaymentMethods([
           {
             value: 'wechat',
             title: '微信支付',
@@ -252,18 +252,18 @@
           }
         ])
 
-        PaymentPanel.on('payment-confirm', eventConfirmHandler)
-        PaymentPanel.open(199.99)
+        pypjs.on('payment-confirm', eventConfirmHandler)
+        pypjs.open(199.99)
       }
 
       // never 模式：不显示图标
       function openPanelWithNeverMode() {
-        PaymentPanel.setConfig({
+        pypjs.setConfig({
           iconDisplay: 'never',
           headerTitle: '支付方式'
         })
 
-        PaymentPanel.setPaymentMethods([
+        pypjs.setPaymentMethods([
           {
             value: 'wechat',
             title: '微信支付',
@@ -283,18 +283,18 @@
           }
         ])
 
-        PaymentPanel.on('payment-confirm', eventConfirmHandler)
-        PaymentPanel.open(199.99)
+        pypjs.on('payment-confirm', eventConfirmHandler)
+        pypjs.open(199.99)
       }
 
       // 混合示例：图片URL + 字符串 + 无图标
       function openPanelWithMixedIcons() {
-        PaymentPanel.setConfig({
+        pypjs.setConfig({
           iconDisplay: 'always',
           headerTitle: '支付方式'
         })
 
-        PaymentPanel.setPaymentMethods([
+        pypjs.setPaymentMethods([
           {
             value: 'wechat',
             title: '微信支付',
@@ -321,18 +321,18 @@
           }
         ])
 
-        PaymentPanel.on('payment-confirm', eventConfirmHandler)
-        PaymentPanel.open(299.99)
+        pypjs.on('payment-confirm', eventConfirmHandler)
+        pypjs.open(299.99)
       }
 
       // 图片加载失败示例
       function openPanelWithFailedImage() {
-        PaymentPanel.setConfig({
+        pypjs.setConfig({
           iconDisplay: 'always',
           headerTitle: '支付方式'
         })
 
-        PaymentPanel.setPaymentMethods([
+        pypjs.setPaymentMethods([
           {
             value: 'wechat',
             title: '微信支付',
@@ -353,8 +353,8 @@
           }
         ])
 
-        PaymentPanel.on('payment-confirm', eventConfirmHandler)
-        PaymentPanel.open(199.99)
+        pypjs.on('payment-confirm', eventConfirmHandler)
+        pypjs.open(199.99)
       }
     </script>
   </body>

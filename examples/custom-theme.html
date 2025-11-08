@@ -138,7 +138,7 @@
 
       // 红色主题示例 - 展示高度自定义配置
       function openPanelWithRedTheme() {
-        PaymentPanel.setConfig({
+        pypjs.setConfig({
           headerTitle: '确认支付',
           theme: {
             // 主色调 - 红色系
@@ -161,7 +161,7 @@
         })
 
         // 或者使用 setTheme 方法单独设置主题
-        // PaymentPanel.setTheme({
+        // pypjs.setTheme({
         //   primaryColor: '#ff4d4f',
         //   primaryHoverColor: '#ff7875',
         //   panelBgLight: 'linear-gradient(135deg, #fff5f5 0%, #ffe8e8 100%)',
@@ -172,8 +172,8 @@
         //   textSecondaryDark: '#ff9999'
         // })
 
-        PaymentPanel.on('payment-confirm', eventConfirmHandler)
-        PaymentPanel.open(299.99)
+        pypjs.on('payment-confirm', eventConfirmHandler)
+        pypjs.open(299.99)
       }
     </script>
   </body>

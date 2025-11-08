@@ -197,24 +197,24 @@
 
       function openBasicPanel() {
         // 重置为默认配置
-        PaymentPanel.setConfig({
+        pypjs.setConfig({
           allowSwipeToClose: true,
           closeOnOverlayClick: false,
           enablePassword: false
         })
 
         // 监听事件
-        PaymentPanel.on('payment-confirm', eventConfirmHandler)
-        PaymentPanel.on('payment-close', eventCloseHandler)
+        pypjs.on('payment-confirm', eventConfirmHandler)
+        pypjs.on('payment-close', eventCloseHandler)
 
         // 打开面板并设置金额
-        PaymentPanel.open(99.99)
+        pypjs.open(99.99)
       }
 
       // 统一配置示例：禁止下拉关闭 + 密码输入
       function openPanelWithConfig() {
         // 使用统一配置方法设置所有选项
-        PaymentPanel.setConfig({
+        pypjs.setConfig({
           allowSwipeToClose: false, // 禁止下拉关闭，拖动滑块会自动隐藏
           closeOnOverlayClick: false, // 禁止点击遮罩层关闭
           enablePassword: true, // 启用密码输入
@@ -224,21 +224,21 @@
           velocityThreshold: 0.8 // 速度阈值0.8px/ms
         })
 
-        PaymentPanel.on('payment-confirm', eventConfirmHandler)
-        PaymentPanel.open(199.99)
+        pypjs.on('payment-confirm', eventConfirmHandler)
+        pypjs.open(199.99)
       }
 
       // 自定义支付方式 + 多个选项（测试滚动）
       function openPanelWithCustomMethods() {
         // 重置配置
-        PaymentPanel.setConfig({
+        pypjs.setConfig({
           allowSwipeToClose: true,
           closeOnOverlayClick: true,
           enablePassword: false
         })
 
         // 自定义支付方式列表（支持二级结构）
-        PaymentPanel.setPaymentMethods(
+        pypjs.setPaymentMethods(
           [
             {
               name: '在线支付',
@@ -273,27 +273,27 @@
           }
         )
 
-        PaymentPanel.on('payment-confirm', eventConfirmHandler)
-        PaymentPanel.open(299.99)
+        pypjs.on('payment-confirm', eventConfirmHandler)
+        pypjs.open(299.99)
       }
 
       // 自定义标题示例
       function openPanelWithCustomTitle() {
         // 使用 setConfig 设置标题
-        PaymentPanel.setConfig({
+        pypjs.setConfig({
           headerTitle: '❤❤❤❤ 爱心支付 ❤❤❤❤'
         })
 
         // 或者使用 setHeaderTitle 方法
-        // PaymentPanel.setHeaderTitle('确认付款')
+        // pypjs.setHeaderTitle('确认付款')
 
-        PaymentPanel.on('payment-confirm', eventConfirmHandler)
-        PaymentPanel.open(88.88)
+        pypjs.on('payment-confirm', eventConfirmHandler)
+        pypjs.open(88.88)
       }
 
       // 红色主题示例 - 展示高度自定义配置
       function openPanelWithRedTheme() {
-        PaymentPanel.setConfig({
+        pypjs.setConfig({
           headerTitle: '确认支付',
           theme: {
             // 主色调 - 红色系
@@ -316,7 +316,7 @@
         })
 
         // 或者使用 setTheme 方法单独设置主题
-        // PaymentPanel.setTheme({
+        // pypjs.setTheme({
         //   primaryColor: '#ff4d4f',
         //   primaryHoverColor: '#ff7875',
         //   panelBgLight: 'linear-gradient(135deg, #fff5f5 0%, #ffe8e8 100%)',
@@ -327,8 +327,8 @@
         //   textSecondaryDark: '#ff9999'
         // })
 
-        PaymentPanel.on('payment-confirm', eventConfirmHandler)
-        PaymentPanel.open(299.99)
+        pypjs.on('payment-confirm', eventConfirmHandler)
+        pypjs.open(299.99)
       }
     </script>
   </body>

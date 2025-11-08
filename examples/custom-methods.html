@@ -128,14 +128,14 @@
       // 自定义支付方式 + 多个选项（测试滚动）
       function openPanelWithCustomMethods() {
         // 重置配置
-        PaymentPanel.setConfig({
+        pypjs.setConfig({
           allowSwipeToClose: true,
           closeOnOverlayClick: true,
           enablePassword: false
         })
 
         // 自定义支付方式列表（支持二级结构）
-        PaymentPanel.setPaymentMethods(
+        pypjs.setPaymentMethods(
           [
             {
               name: '在线支付',
@@ -170,8 +170,8 @@
           }
         )
 
-        PaymentPanel.on('payment-confirm', eventConfirmHandler)
-        PaymentPanel.open(299.99)
+        pypjs.on('payment-confirm', eventConfirmHandler)
+        pypjs.open(299.99)
       }
     </script>
   </body>

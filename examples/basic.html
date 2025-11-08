@@ -130,18 +130,18 @@
 
       function openBasicPanel() {
         // 重置为默认配置
-        PaymentPanel.setConfig({
+        pypjs.setConfig({
           allowSwipeToClose: true,
           closeOnOverlayClick: false,
           enablePassword: false
         })
 
         // 监听事件
-        PaymentPanel.on('payment-confirm', eventConfirmHandler)
-        PaymentPanel.on('payment-close', eventCloseHandler)
+        pypjs.on('payment-confirm', eventConfirmHandler)
+        pypjs.on('payment-close', eventCloseHandler)
 
         // 打开面板并设置金额
-        PaymentPanel.open(99.99)
+        pypjs.open(99.99)
       }
     </script>
   </body>

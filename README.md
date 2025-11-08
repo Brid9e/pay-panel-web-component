@@ -10,28 +10,28 @@ A simple and easy-to-use payment panel component.
 <script src="./dist/index.js"></script>
 ```
 
-After including, the global `PaymentPanel` object is available for use.
+After including, the global `pypjs` object is available for use.
 
 ### 2. Open Payment Panel
 
 ```javascript
 // Basic usage
-PaymentPanel.open();
+pypjs.open();
 
 // Open with amount
-PaymentPanel.open(99.99);
+pypjs.open(99.99);
 ```
 
 ### 3. Close Payment Panel
 
 ```javascript
-PaymentPanel.close();
+pypjs.close();
 ```
 
 ### 4. Set Amount
 
 ```javascript
-PaymentPanel.setAmount(199.00);
+pypjs.setAmount(199.00);
 ```
 
 ### 5. Custom Payment Methods
@@ -40,7 +40,7 @@ PaymentPanel.setAmount(199.00);
 
 ```javascript
 // Set payment methods list and field mapping
-PaymentPanel.setPaymentMethods(
+pypjs.setPaymentMethods(
   [
     { id: 1, name: 'WeChat Pay', desc: 'Recommended', icon: '💳' },
     { id: 2, name: 'Alipay', desc: 'Secure & Convenient', icon: '💰' },
@@ -60,7 +60,7 @@ PaymentPanel.setPaymentMethods(
 Supports two-level grouping structure. Click group headers to expand/collapse items:
 
 ```javascript
-PaymentPanel.setPaymentMethods(
+pypjs.setPaymentMethods(
   [
     {
       name: 'Online Payment',
@@ -112,7 +112,7 @@ Supports three icon types:
 
 ```javascript
 // Use setConfig to configure all options
-PaymentPanel.setConfig({
+pypjs.setConfig({
   allowSwipeToClose: false,        // Allow swipe to close (hides drag handle when false)
   closeOnOverlayClick: false,      // Close on overlay click
   enablePassword: true,            // Enable password input
@@ -141,25 +141,25 @@ PaymentPanel.setConfig({
 
 ```javascript
 // Set title
-PaymentPanel.setHeaderTitle('Confirm Payment');
+pypjs.setHeaderTitle('Confirm Payment');
 
 // Set amount label
-PaymentPanel.setAmountLabel('Payment Amount');
+pypjs.setAmountLabel('Payment Amount');
 
 // Set close thresholds
-PaymentPanel.setCloseThreshold(150); // Set distance threshold to 150px
-PaymentPanel.setCloseThresholdPercent(0.4); // Set distance threshold to 40% of panel height
-PaymentPanel.setVelocityThreshold(0.8); // Set velocity threshold to 0.8px/ms
+pypjs.setCloseThreshold(150); // Set distance threshold to 150px
+pypjs.setCloseThresholdPercent(0.4); // Set distance threshold to 40% of panel height
+pypjs.setVelocityThreshold(0.8); // Set velocity threshold to 0.8px/ms
 
 // Set overlay click behavior
-PaymentPanel.setCloseOnOverlayClick(false);
+pypjs.setCloseOnOverlayClick(false);
 
 // Set password input
-PaymentPanel.setEnablePassword(true);
-PaymentPanel.setPasswordLength(6); // Set password length (default 6)
+pypjs.setEnablePassword(true);
+pypjs.setPasswordLength(6); // Set password length (default 6)
 
 // Set theme
-PaymentPanel.setTheme({
+pypjs.setTheme({
   primaryColor: '#ff4d4f',
   primaryHoverColor: '#ff7875',
   panelBgLight: 'linear-gradient(135deg, #fff5f5 0%, #ffe8e8 100%)',
@@ -167,14 +167,14 @@ PaymentPanel.setTheme({
 });
 
 // Reset to default configuration
-PaymentPanel.resetConfig();
+pypjs.resetConfig();
 ```
 
 ### 8. Event Listeners
 
 ```javascript
 // Listen to payment confirm event
-PaymentPanel.on('payment-confirm', (e) => {
+pypjs.on('payment-confirm', (e) => {
   const { method, amount, methodData } = e.detail;
   console.log('Payment method:', method);
   console.log('Amount:', amount);
@@ -182,12 +182,12 @@ PaymentPanel.on('payment-confirm', (e) => {
 });
 
 // Listen to close event
-PaymentPanel.on('payment-close', () => {
+pypjs.on('payment-close', () => {
   console.log('Payment panel closed');
 });
 
 // Remove event listener
-PaymentPanel.off('payment-confirm', handler);
+pypjs.off('payment-confirm', handler);
 ```
 
 ## API
@@ -196,24 +196,24 @@ PaymentPanel.off('payment-confirm', handler);
 
 #### Basic Methods
 
-- `PaymentPanel.open(amount?: number)` - Open payment panel, optionally with amount
-- `PaymentPanel.close()` - Close payment panel
-- `PaymentPanel.setAmount(amount: number)` - Set payment amount
+- `pypjs.open(amount?: number)` - Open payment panel, optionally with amount
+- `pypjs.close()` - Close payment panel
+- `pypjs.setAmount(amount: number)` - Set payment amount
 
 #### Payment Methods
 
-- `PaymentPanel.setPaymentMethods(methods?, fieldMapping?)` - Set payment methods list
+- `pypjs.setPaymentMethods(methods?, fieldMapping?)` - Set payment methods list
   - `methods`: Payment methods array (optional), if not provided or empty array, restores default payment methods
   - `fieldMapping`: Optional field mapping configuration
     - `titleField`: Title field name (default 'title' or 'name')
     - `subtitleField`: Subtitle field name (default 'subtitle' or 'desc')
     - `iconField`: Icon field name (default 'icon')
     - `valueField`: Value field name (default 'value' or 'id')
-- `PaymentPanel.getSelectedMethod()` - Get currently selected payment method
+- `pypjs.getSelectedMethod()` - Get currently selected payment method
 
 #### Unified Configuration
 
-- `PaymentPanel.setConfig(config: PaymentPanelConfig)` - Configure all options
+- `pypjs.setConfig(config: pypjsConfig)` - Configure all options
   - `allowSwipeToClose?: boolean` - Allow swipe to close (default true, hides drag handle when false)
   - `closeOnOverlayClick?: boolean` - Close on overlay click (default true)
   - `enablePassword?: boolean` - Enable password input (default false)
@@ -240,25 +240,25 @@ PaymentPanel.off('payment-confirm', handler);
 
   **Note**: If a configuration item is not provided (undefined), it will automatically revert to the default value.
 
-- `PaymentPanel.resetConfig()` - Reset all configurations to default values
+- `pypjs.resetConfig()` - Reset all configurations to default values
 
 #### Individual Configuration Methods
 
-- `PaymentPanel.setHeaderTitle(title: string)` - Set header title text
-- `PaymentPanel.setAmountLabel(label: string)` - Set amount label text
-- `PaymentPanel.setCloseThreshold(threshold: number)` - Set close distance threshold (pixels)
-- `PaymentPanel.setCloseThresholdPercent(percent: number)` - Set close distance threshold (percentage, 0-1)
-- `PaymentPanel.setVelocityThreshold(threshold: number)` - Set velocity threshold (pixels/ms)
-- `PaymentPanel.setCloseOnOverlayClick(close: boolean)` - Set whether to close on overlay click
-- `PaymentPanel.setEnablePassword(enable: boolean)` - Set whether to enable password input
-- `PaymentPanel.setPasswordLength(length: number)` - Set password length (4-12 digits)
-- `PaymentPanel.setTheme(theme: ThemeConfig)` - Set theme configuration
-- `PaymentPanel.getTheme()` - Get current theme configuration
+- `pypjs.setHeaderTitle(title: string)` - Set header title text
+- `pypjs.setAmountLabel(label: string)` - Set amount label text
+- `pypjs.setCloseThreshold(threshold: number)` - Set close distance threshold (pixels)
+- `pypjs.setCloseThresholdPercent(percent: number)` - Set close distance threshold (percentage, 0-1)
+- `pypjs.setVelocityThreshold(threshold: number)` - Set velocity threshold (pixels/ms)
+- `pypjs.setCloseOnOverlayClick(close: boolean)` - Set whether to close on overlay click
+- `pypjs.setEnablePassword(enable: boolean)` - Set whether to enable password input
+- `pypjs.setPasswordLength(length: number)` - Set password length (4-12 digits)
+- `pypjs.setTheme(theme: ThemeConfig)` - Set theme configuration
+- `pypjs.getTheme()` - Get current theme configuration
 
 #### Events
 
-- `PaymentPanel.on(event, handler)` - Listen to events (auto-deduplication, same handler only added once)
-- `PaymentPanel.off(event, handler)` - Remove event listener
+- `pypjs.on(event, handler)` - Listen to events (auto-deduplication, same handler only added once)
+- `pypjs.off(event, handler)` - Remove event listener
 
 ### Swipe to Close
 
@@ -314,18 +314,18 @@ The component supports flexible icon display configuration:
 
 ```javascript
 // Set icon display mode
-PaymentPanel.setConfig({
+pypjs.setConfig({
   iconDisplay: 'auto' // Show when icon exists, hide when not
 });
 
 // Use image URL
-PaymentPanel.setPaymentMethods([
+pypjs.setPaymentMethods([
   { id: 1, name: 'WeChat Pay', icon: 'https://example.com/wechat.png' },
   { id: 2, name: 'Alipay', icon: 'https://i.alipayobjects.com/common/favicon/favicon.ico' }
 ]);
 
 // Use string
-PaymentPanel.setPaymentMethods([
+pypjs.setPaymentMethods([
   { id: 1, name: 'WeChat Pay', icon: '💳' },  // emoji
   { id: 2, name: 'Alipay', icon: 'A' }        // single character
 ]);
@@ -339,7 +339,7 @@ The component automatically detects system theme settings and supports light and
 
 ```javascript
 // Use setTheme method to set theme
-PaymentPanel.setTheme({
+pypjs.setTheme({
   primaryColor: '#ff4d4f',                    // Primary color
   primaryHoverColor: '#ff7875',               // Primary hover color
   overlayColor: 'rgba(0, 0, 0, 0.6)',        // Overlay color
@@ -352,13 +352,13 @@ PaymentPanel.setTheme({
 });
 
 // Support gradient backgrounds
-PaymentPanel.setTheme({
+pypjs.setTheme({
   panelBgLight: 'linear-gradient(135deg, #fff5f5 0%, #ffe8e8 100%)',
   panelBgDark: 'linear-gradient(135deg, #1a0f0f 0%, #2d1a1a 100%)'
 });
 
 // Set theme in setConfig
-PaymentPanel.setConfig({
+pypjs.setConfig({
   theme: {
     primaryColor: '#ff4d4f',
     primaryHoverColor: '#ff7875'

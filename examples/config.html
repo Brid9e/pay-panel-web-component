@@ -136,7 +136,7 @@
       // 统一配置示例：禁止下拉关闭 + 密码输入
       function openPanelWithConfig() {
         // 使用统一配置方法设置所有选项
-        PaymentPanel.setConfig({
+        pypjs.setConfig({
           allowSwipeToClose: false, // 禁止下拉关闭，拖动滑块会自动隐藏
           closeOnOverlayClick: false, // 禁止点击遮罩层关闭
           enablePassword: true, // 启用密码输入
@@ -146,8 +146,8 @@
           velocityThreshold: 0.8 // 速度阈值0.8px/ms
         })
 
-        PaymentPanel.on('payment-confirm', eventConfirmHandler)
-        PaymentPanel.open(199.99)
+        pypjs.on('payment-confirm', eventConfirmHandler)
+        pypjs.open(199.99)
       }
     </script>
   </body>

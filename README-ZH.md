@@ -10,28 +10,28 @@
 <script src="./dist/index.js"></script>
 ```
 
-引入后会自动初始化，全局对象 `PaymentPanel` 可直接使用。
+引入后会自动初始化，全局对象 `pypjs` 可直接使用。
 
 ### 2. 打开支付面板
 
 ```javascript
 // 基础打开
-PaymentPanel.open();
+pypjs.open();
 
 // 带金额打开
-PaymentPanel.open(99.99);
+pypjs.open(99.99);
 ```
 
 ### 3. 关闭支付面板
 
 ```javascript
-PaymentPanel.close();
+pypjs.close();
 ```
 
 ### 4. 设置金额
 
 ```javascript
-PaymentPanel.setAmount(199.00);
+pypjs.setAmount(199.00);
 ```
 
 ### 5. 自定义支付方式
@@ -40,7 +40,7 @@ PaymentPanel.setAmount(199.00);
 
 ```javascript
 // 设置支付方式列表和字段映射
-PaymentPanel.setPaymentMethods(
+pypjs.setPaymentMethods(
   [
     { id: 1, name: '微信支付', desc: '推荐使用', icon: '💳' },
     { id: 2, name: '支付宝', desc: '安全便捷', icon: '💰' },
@@ -60,7 +60,7 @@ PaymentPanel.setPaymentMethods(
 支持二级分组结构，点击分组标题可展开/折叠子项：
 
 ```javascript
-PaymentPanel.setPaymentMethods(
+pypjs.setPaymentMethods(
   [
     {
       name: '在线支付',
@@ -112,7 +112,7 @@ PaymentPanel.setPaymentMethods(
 
 ```javascript
 // 使用 setConfig 方法统一配置所有选项
-PaymentPanel.setConfig({
+pypjs.setConfig({
   allowSwipeToClose: false,        // 是否允许下拉关闭（false时隐藏拖动滑块）
   closeOnOverlayClick: false,      // 点击遮罩层是否关闭
   enablePassword: true,            // 是否启用密码输入
@@ -141,25 +141,25 @@ PaymentPanel.setConfig({
 
 ```javascript
 // 设置标题
-PaymentPanel.setHeaderTitle('确认付款');
+pypjs.setHeaderTitle('确认付款');
 
 // 设置金额标签
-PaymentPanel.setAmountLabel('付款金额');
+pypjs.setAmountLabel('付款金额');
 
 // 设置关闭阈值
-PaymentPanel.setCloseThreshold(150); // 设置距离阈值为150px
-PaymentPanel.setCloseThresholdPercent(0.4); // 设置距离阈值为面板高度的40%
-PaymentPanel.setVelocityThreshold(0.8); // 设置速度阈值为0.8px/ms
+pypjs.setCloseThreshold(150); // 设置距离阈值为150px
+pypjs.setCloseThresholdPercent(0.4); // 设置距离阈值为面板高度的40%
+pypjs.setVelocityThreshold(0.8); // 设置速度阈值为0.8px/ms
 
 // 设置点击遮罩层是否关闭
-PaymentPanel.setCloseOnOverlayClick(false);
+pypjs.setCloseOnOverlayClick(false);
 
 // 设置密码输入
-PaymentPanel.setEnablePassword(true);
-PaymentPanel.setPasswordLength(6); // 设置密码位数（默认6位）
+pypjs.setEnablePassword(true);
+pypjs.setPasswordLength(6); // 设置密码位数（默认6位）
 
 // 设置主题
-PaymentPanel.setTheme({
+pypjs.setTheme({
   primaryColor: '#ff4d4f',
   primaryHoverColor: '#ff7875',
   panelBgLight: 'linear-gradient(135deg, #fff5f5 0%, #ffe8e8 100%)',
@@ -167,14 +167,14 @@ PaymentPanel.setTheme({
 });
 
 // 重置为默认配置
-PaymentPanel.resetConfig();
+pypjs.resetConfig();
 ```
 
 ### 8. 监听事件
 
 ```javascript
 // 监听支付确认事件
-PaymentPanel.on('payment-confirm', (e) => {
+pypjs.on('payment-confirm', (e) => {
   const { method, amount, methodData } = e.detail;
   console.log('支付方式:', method);
   console.log('支付金额:', amount);
@@ -182,12 +182,12 @@ PaymentPanel.on('payment-confirm', (e) => {
 });
 
 // 监听关闭事件
-PaymentPanel.on('payment-close', () => {
+pypjs.on('payment-close', () => {
   console.log('支付面板已关闭');
 });
 
 // 移除事件监听
-PaymentPanel.off('payment-confirm', handler);
+pypjs.off('payment-confirm', handler);
 ```
 
 ## API
@@ -196,24 +196,24 @@ PaymentPanel.off('payment-confirm', handler);
 
 #### 基础方法
 
-- `PaymentPanel.open(amount?: number)` - 打开支付面板，可选传入金额
-- `PaymentPanel.close()` - 关闭支付面板
-- `PaymentPanel.setAmount(amount: number)` - 设置支付金额
+- `pypjs.open(amount?: number)` - 打开支付面板，可选传入金额
+- `pypjs.close()` - 关闭支付面板
+- `pypjs.setAmount(amount: number)` - 设置支付金额
 
 #### 支付方式
 
-- `PaymentPanel.setPaymentMethods(methods?, fieldMapping?)` - 设置支付方式列表
+- `pypjs.setPaymentMethods(methods?, fieldMapping?)` - 设置支付方式列表
   - `methods`: 支付方式数组（可选），如果不传或传空数组，会恢复为默认支付方式
   - `fieldMapping`: 可选，字段映射配置
     - `titleField`: 标题字段名（默认 'title' 或 'name'）
     - `subtitleField`: 副标题字段名（默认 'subtitle' 或 'desc'）
     - `iconField`: 图标字段名（默认 'icon'）
     - `valueField`: 值字段名（默认 'value' 或 'id'）
-- `PaymentPanel.getSelectedMethod()` - 获取当前选中的支付方式
+- `pypjs.getSelectedMethod()` - 获取当前选中的支付方式
 
 #### 统一配置
 
-- `PaymentPanel.setConfig(config: PaymentPanelConfig)` - 统一配置所有选项
+- `pypjs.setConfig(config: pypjsConfig)` - 统一配置所有选项
   - `allowSwipeToClose?: boolean` - 是否允许下拉关闭（默认 true，false 时隐藏拖动滑块）
   - `closeOnOverlayClick?: boolean` - 点击遮罩层是否关闭（默认 true）
   - `enablePassword?: boolean` - 是否启用密码输入（默认 false）
@@ -240,25 +240,25 @@ PaymentPanel.off('payment-confirm', handler);
 
   **注意**：如果某个配置项没有传入（undefined），会自动恢复为默认值。
 
-- `PaymentPanel.resetConfig()` - 重置所有配置为默认值
+- `pypjs.resetConfig()` - 重置所有配置为默认值
 
 #### 单独配置方法
 
-- `PaymentPanel.setHeaderTitle(title: string)` - 设置标题文本
-- `PaymentPanel.setAmountLabel(label: string)` - 设置金额标签文本
-- `PaymentPanel.setCloseThreshold(threshold: number)` - 设置关闭距离阈值（像素）
-- `PaymentPanel.setCloseThresholdPercent(percent: number)` - 设置关闭距离阈值（百分比，0-1之间）
-- `PaymentPanel.setVelocityThreshold(threshold: number)` - 设置速度阈值（像素/毫秒）
-- `PaymentPanel.setCloseOnOverlayClick(close: boolean)` - 设置点击遮罩层是否关闭
-- `PaymentPanel.setEnablePassword(enable: boolean)` - 设置是否启用密码输入
-- `PaymentPanel.setPasswordLength(length: number)` - 设置密码位数（4-12位）
-- `PaymentPanel.setTheme(theme: ThemeConfig)` - 设置主题配置
-- `PaymentPanel.getTheme()` - 获取当前主题配置
+- `pypjs.setHeaderTitle(title: string)` - 设置标题文本
+- `pypjs.setAmountLabel(label: string)` - 设置金额标签文本
+- `pypjs.setCloseThreshold(threshold: number)` - 设置关闭距离阈值（像素）
+- `pypjs.setCloseThresholdPercent(percent: number)` - 设置关闭距离阈值（百分比，0-1之间）
+- `pypjs.setVelocityThreshold(threshold: number)` - 设置速度阈值（像素/毫秒）
+- `pypjs.setCloseOnOverlayClick(close: boolean)` - 设置点击遮罩层是否关闭
+- `pypjs.setEnablePassword(enable: boolean)` - 设置是否启用密码输入
+- `pypjs.setPasswordLength(length: number)` - 设置密码位数（4-12位）
+- `pypjs.setTheme(theme: ThemeConfig)` - 设置主题配置
+- `pypjs.getTheme()` - 获取当前主题配置
 
 #### 事件
 
-- `PaymentPanel.on(event, handler)` - 监听事件（自动去重，同一个 handler 只会添加一次）
-- `PaymentPanel.off(event, handler)` - 移除事件监听
+- `pypjs.on(event, handler)` - 监听事件（自动去重，同一个 handler 只会添加一次）
+- `pypjs.off(event, handler)` - 移除事件监听
 
 ### 拖拽关闭
 
@@ -314,18 +314,18 @@ PaymentPanel.off('payment-confirm', handler);
 
 ```javascript
 // 设置图标显示模式
-PaymentPanel.setConfig({
+pypjs.setConfig({
   iconDisplay: 'auto' // 有icon时显示，没有时不显示
 });
 
 // 使用图片URL
-PaymentPanel.setPaymentMethods([
+pypjs.setPaymentMethods([
   { id: 1, name: '微信支付', icon: 'https://example.com/wechat.png' },
   { id: 2, name: '支付宝', icon: 'https://i.alipayobjects.com/common/favicon/favicon.ico' }
 ]);
 
 // 使用字符串
-PaymentPanel.setPaymentMethods([
+pypjs.setPaymentMethods([
   { id: 1, name: '微信支付', icon: '💳' },  // emoji
   { id: 2, name: '支付宝', icon: '支' }      // 单个字符
 ]);
@@ -339,7 +339,7 @@ PaymentPanel.setPaymentMethods([
 
 ```javascript
 // 使用 setTheme 方法设置主题
-PaymentPanel.setTheme({
+pypjs.setTheme({
   primaryColor: '#ff4d4f',                    // 主色调
   primaryHoverColor: '#ff7875',               // 主色调悬停色
   overlayColor: 'rgba(0, 0, 0, 0.6)',        // 遮罩层颜色
@@ -352,13 +352,13 @@ PaymentPanel.setTheme({
 });
 
 // 支持渐变背景
-PaymentPanel.setTheme({
+pypjs.setTheme({
   panelBgLight: 'linear-gradient(135deg, #fff5f5 0%, #ffe8e8 100%)',
   panelBgDark: 'linear-gradient(135deg, #1a0f0f 0%, #2d1a1a 100%)'
 });
 
 // 在 setConfig 中设置主题
-PaymentPanel.setConfig({
+pypjs.setConfig({
   theme: {
     primaryColor: '#ff4d4f',
     primaryHoverColor: '#ff7875'

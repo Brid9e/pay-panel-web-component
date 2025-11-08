@@ -128,15 +128,15 @@
       // 自定义标题示例
       function openPanelWithCustomTitle() {
         // 使用 setConfig 设置标题
-        PaymentPanel.setConfig({
+        pypjs.setConfig({
           headerTitle: '❤❤❤❤ 爱心支付 ❤❤❤❤'
         })
 
         // 或者使用 setHeaderTitle 方法
-        // PaymentPanel.setHeaderTitle('确认付款')
+        // pypjs.setHeaderTitle('确认付款')
 
-        PaymentPanel.on('payment-confirm', eventConfirmHandler)
-        PaymentPanel.open(88.88)
+        pypjs.on('payment-confirm', eventConfirmHandler)
+        pypjs.open(88.88)
       }
     </script>
   </body>
