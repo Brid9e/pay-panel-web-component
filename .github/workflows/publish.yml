@@ -11,7 +11,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write  # Required for OIDC authentication (Trusted Publishing)
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -27,8 +26,6 @@ jobs:
           node-version: '20'
           registry-url: 'https://registry.npmjs.org'
           cache: 'pnpm'
-          # Using OIDC authentication (Trusted Publishing)
-          # setup-node@v4 automatically uses OIDC when registry-url is set
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -38,8 +35,5 @@ jobs:
 
       - name: Publish to npm
         run: npm publish --access public
-        # Using OIDC authentication (Trusted Publishing)
-        # Make sure Trusted Publishing is configured in npm: https://docs.npmjs.com/trusted-publishing
-        # If not configured, uncomment the env below and add NPM_TOKEN to GitHub Secrets
-        # env:
-        #   NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
