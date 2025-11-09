@@ -16,12 +16,13 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
+    "pypjs",
     "web-component",
     "payment",
     "panel",
     "mobile"
   ],
-  "author": "",
+  "author": "brid9e",
   "license": "MIT",
   "repository": {
     "type": "git",
