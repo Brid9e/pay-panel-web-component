@@ -15,13 +15,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Extract version from tag
-        id: tag_version
-        run: |
-          VERSION=${GITHUB_REF#refs/tags/v}
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "Extracted version: $VERSION"
-
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
@@ -35,10 +28,6 @@ jobs:
           cache: 'pnpm'
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Update package.json version
-        run: |
-          npm pkg set version=${{ steps.tag_version.outputs.version }}
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
